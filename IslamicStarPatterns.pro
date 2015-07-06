@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui opengl svg
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,8 +13,19 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    GLContainer.cpp \
+    GLWidget.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    ALine.h \
+    AVector.h \
+    GLContainer.h \
+    GLWidget.h \
+    VertexData.h
 
 FORMS    += mainwindow.ui
+
+QMAKE_CXXFLAGS += -frounding-math -O3
+
+QMAKE_CXXFLAGS += -std=gnu++1y
