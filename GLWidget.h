@@ -27,6 +27,8 @@ private:
     // shader
     QOpenGLShaderProgram* _shaderProgram;
 
+    std::vector<ALine> _lines;
+
     // points
     std::vector<AVector>        _points;
     QOpenGLBuffer               _pointsVbo;
@@ -45,13 +47,18 @@ private:
     QMatrix4x4  _transformMatrix;
 
 private:
-   void InitCurve();
-   void PaintCurve();
-   void CreateCurveVAO();
+    void InitCurve();
+    void PaintCurve();
+    void CreateCurveVAO();
 
-   void SaveToSvg();
+    void SaveToSvg();
 
-   void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
+    std::vector<AVector> GenerateNGon(int sides, AVector centerPt);
+    void InitTiling();
+    void ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
+    AVector Multiply(QMatrix3x3 mat, AVector vec);
+
+    void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
     void PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
 
 protected:
