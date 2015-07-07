@@ -1,6 +1,9 @@
 #ifndef VERTEXDATA_H
 #define VERTEXDATA_H
 
+#include <QVector3D>
+#include <QVector2D>
+
 // VertexData
 struct VertexData
 {

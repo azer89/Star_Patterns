@@ -10,6 +10,7 @@
 
 #include "AVector.h"
 #include "ALine.h"
+#include "PatternGenerator.h"
 
 class GLWidget : public QGLWidget
 {
@@ -27,7 +28,9 @@ private:
     // shader
     QOpenGLShaderProgram* _shaderProgram;
 
-    std::vector<ALine> _lines;
+    PatternGenerator* _patternGenerator;
+
+    std::vector<ALine> _tilingLines;
 
     // points
     std::vector<AVector>        _points;
@@ -35,8 +38,8 @@ private:
     QOpenGLVertexArrayObject    _pointsVao;
 
     // lines
-    QOpenGLBuffer               _linesVbo;
-    QOpenGLVertexArrayObject    _linesVao;
+    QOpenGLBuffer               _tilingLinesVbo;
+    QOpenGLVertexArrayObject    _tilingLinesVao;
 
     // for rendering
     int         _mvpMatrixLocation;
@@ -53,10 +56,12 @@ private:
 
     void SaveToSvg();
 
-    std::vector<AVector> GenerateNGon(int sides, AVector centerPt);
-    void InitTiling();
+     void InitTiling();
+
+    std::vector<AVector> GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
     void ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
-    AVector Multiply(QMatrix3x3 mat, AVector vec);
+    AVector MultiplyVector(QMatrix3x3 mat, AVector vec);
+    void MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
 
     void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
     void PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);

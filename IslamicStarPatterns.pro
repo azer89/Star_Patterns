@@ -15,7 +15,9 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     GLContainer.cpp \
-    GLWidget.cpp
+    GLWidget.cpp \
+    tinyxml2.cpp \
+    PatternGenerator.cpp
 
 HEADERS  += mainwindow.h \
     ALine.h \
@@ -23,7 +25,9 @@ HEADERS  += mainwindow.h \
     GLContainer.h \
     GLWidget.h \
     VertexData.h \
-    Tiling.h
+    Tiling.h \
+    tinyxml2.h \
+    PatternGenerator.h
 
 FORMS    += mainwindow.ui
 
