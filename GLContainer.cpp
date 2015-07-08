@@ -308,9 +308,23 @@ void GLContainer::keyPressEvent(QKeyEvent *event)
         this->_ctrlPressed = true;
         QApplication::setOverrideCursor(Qt::OpenHandCursor);
     }
+
+    if(event->key() == Qt::Key_Right)
+    {
+        //std::cout << "right\n";
+        _glWidget->IncreaseDiv();
+    }
+    else if(event->key() == Qt::Key_Left)
+    {
+        //std::cout << "left\n";
+        _glWidget->DecreaseDiv();
+    }
+
     //if(event->key() == Qt::Key_C) { this->glWidget->DoClustering(); }
 
-    _glWidget->updateGL();
+
+    //_glWidget->updateGL();
+    _glWidget->repaint();
 }
 
 void GLContainer::keyReleaseEvent(QKeyEvent *event)

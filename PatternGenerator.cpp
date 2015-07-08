@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <iostream>
 
+#include "tinyxml2.h"
+
 #include "VertexData.h"
 #include "PatternGenerator.h"
 
 
-PatternGenerator::PatternGenerator()
+PatternGenerator::PatternGenerator(): sideDiv(1)
 {
 }
 
@@ -14,8 +16,203 @@ PatternGenerator::~PatternGenerator()
 {
 }
 
-void PatternGenerator::InitTiling()
+void PatternGenerator::ReadXML(std::string filename)
 {
+    using namespace tinyxml2;
+
+    XMLDocument doc;
+    doc.LoadFile( filename.c_str() );
+    std::cout << "XMl error: " << doc.ErrorID() << "\n\n";
+
+    for( XMLNode* node = doc.FirstChildElement("tiling-library")->FirstChildElement("tiling");
+        node;
+        node = node->NextSibling() )
+    {
+        TilingData tilingData;
+
+        XMLElement* elem = node->ToElement();
+        tilingData._name = elem->Attribute("name");
+        //std::string tiling_name = elem->Attribute("name");
+        //std::cout << "(" << tiling_name << ")" << "\n";
+
+        // translations
+        XMLNode* tNode = node->FirstChildElement("translations");
+        XMLNode* vNode1 = tNode->FirstChildElement("vector");
+        XMLNode* vNode2 = vNode1->NextSibling();
+
+        XMLElement* vElement1 = vNode1->ToElement();
+        XMLElement* vElement2 = vNode2->ToElement();
+
+        tilingData._translation1 = AVector(std::stof(vElement1->Attribute("x")), std::stof(vElement1->Attribute("y")));
+        tilingData._translation2 = AVector(std::stof(vElement2->Attribute("x")), std::stof(vElement2->Attribute("y")));
+        //std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
+
+        // tiles
+        for( XMLNode* tileNode = tNode->NextSibling();
+            tileNode;
+            tileNode = tileNode->NextSibling() )
+        {
+            TileData tileData;
+
+            // shape
+            XMLNode* shapeNode = tileNode->FirstChildElement("shape");
+            XMLElement* shapeElement = shapeNode->ToElement();
+
+            std::string typeStr = shapeElement->Attribute("type");
+
+            ShapeType sType;
+            if(typeStr == "regular")
+            {
+                sType = ShapeType::S_REGULAR;
+                tileData._sides = std::stof(shapeElement->Attribute("sides"));
+
+                //if(tileData._sides == 5)
+                //{
+                //    std::cout << "sides 5\n";
+                //}
+            }
+            else if(typeStr == "polygon")
+            {
+                //std::cout << "polygon\n";
+                sType = ShapeType::S_POLYGON;
+
+                for( XMLNode* vertexNode = shapeNode->FirstChildElement("vertex");
+                    vertexNode;
+                    vertexNode = vertexNode->NextSibling() )
+                {
+                    XMLElement* vertexElement = vertexNode->ToElement();
+                    tileData._vertices.push_back(AVector(std::stof(vertexElement->Attribute("x")),
+                                                         std::stof(vertexElement->Attribute("y"))));
+                    //std::cout << "v " << std::stof(vertexElement->Attribute("x")) << " " << std::stof(vertexElement->Attribute("y")) << "\n";
+                }
+            }
+
+            tileData._shapeType = sType;
+
+
+            //float sidesStr = std::stof(shapeElement->Attribute("sides"));
+            //std::cout << typeStr << " " << sidesStr << "\n";
+
+            // transformations
+            for( XMLNode* transformNode = tileNode->FirstChildElement("transform");
+                transformNode;
+                transformNode = transformNode->NextSibling() )
+            {
+                QMatrix3x3 mat;
+
+                //std::cout << "t";
+                XMLElement* transformElement = transformNode->ToElement();
+
+                mat(0, 0) = std::stof(transformElement->Attribute("a"));
+                mat(0, 1) = std::stof(transformElement->Attribute("b"));
+                mat(0, 2) = std::stof(transformElement->Attribute("c"));
+
+                mat(1, 0) = std::stof(transformElement->Attribute("d"));
+                mat(1, 1) = std::stof(transformElement->Attribute("e"));
+                mat(1, 2) = std::stof(transformElement->Attribute("f"));
+
+                tileData._transforms.push_back(mat);
+                //std::cout << mat(0, 0) << " " << mat(0, 1) << " " << mat(0, 2) << " "
+                //          << mat(1, 0) << " " << mat(1, 1) << " " << mat(1, 2) << "\n";
+            }
+            tilingData._tiles.push_back(tileData);
+            //std::cout << "\n";
+        }
+        //std::cout << "\n";
+        this->_tilings.push_back(tilingData);
+    }
+    //std::cout << _tilings.size() << "\n";
+
+}
+
+TilingData PatternGenerator::GetTiling(std::string tilingName)
+{
+    TilingData tilingData;
+    for(int a = 0; a < _tilings.size(); a++)
+    {
+        if(_tilings[a]._name == tilingName)
+        {
+            tilingData = _tilings[a];
+            break;
+        }
+    }
+
+    return tilingData;
+}
+
+void PatternGenerator::InitTiling2()
+{
+    _tilings.clear();
+    ReadXML("../IslamicStarPatterns/archimedeans.xml");
+    ReadXML("../IslamicStarPatterns/hanbury.xml");
+
+
+    _tilingLines.clear();
+
+    TilingData tilingData = GetTiling("alhambra RD");
+    AVector trans1 = tilingData._translation1;
+    AVector trans2 = tilingData._translation2;
+    AVector centerPt(this->_img_width / 2, this->_img_height / 2);
+    std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
+    for(int a = 0; a < 10; a++)
+    {
+        for(int b = 0; b < 10; b++)
+        {
+            for(int c = 0; c < tilingData._tiles.size(); c++)
+            {
+                TileData tileData = tilingData._tiles[c];
+                //if(tileData._shapeType == ShapeType::S_REGULAR)
+                //{
+                float sides = tileData._sides;
+                float radAngle = (M_PI / (float)sides);
+                float radius = 1.0 / cos(radAngle);
+                float angleOffset = tileData.GetRotation();
+
+                /*
+                if(tileData._shapeType == ShapeType::S_REGULAR && sides == 16)
+                {
+                    //std::cout << "5 angle offset " << angleOffset << "\n";
+                    angleOffset = M_PI / sideDiv;
+                    std::cout << sideDiv << "  " << angleOffset << "\n";
+                }
+                */
+
+                std::vector<AVector> shape;
+                if(tileData._shapeType == ShapeType::S_REGULAR)
+                {
+                    shape = GenerateNGon(sides, radius, angleOffset, AVector(0, 0));
+                }
+                else if(tileData._shapeType == ShapeType::S_POLYGON)
+                {
+                    shape = std::vector<AVector>(tileData._vertices);
+                }
+
+                for(int d = 0; d < tileData._transforms.size(); d++)
+                {
+                    QMatrix3x3 mat = tileData._transforms[d];
+                    std::vector<AVector> tempShape(shape);
+                    MultiplyShape(mat, tempShape);
+
+                    AVector pos = centerPt + trans1 * a + trans2 * b;
+                    for(int i = 0; i < tempShape.size(); i++)
+                        { tempShape[i] += pos; }
+                    ConcatNGon(tempShape, _tilingLines);
+                }
+                //std::vector<AVector> shape = GenerateNGon(sides, radius, angleOffset, AVector(0, 0));
+                //MultiplyShape(tileData.);
+                //}
+            }
+        }
+    }
+    PrepareLinesVAO(_tilingLines, &_tilingLinesVbo, &_tilingLinesVao, QVector3D(1.0, 0.0, 0.0));
+}
+
+// an old version
+void PatternGenerator::InitTiling1()
+{
+    _tilings.clear();
+    ReadXML("/home/azer/workspace/cpp/IslamicStarPatterns/archimedeans.xml");
+
     // 6.6.6
     AVector trans1(2.0000000000000004, -7.740128356567047E-16);
     AVector trans2(1.0, 1.7320508075688767);
@@ -31,7 +228,6 @@ void PatternGenerator::InitTiling()
             ConcatNGon(shape, _tilingLines);
         }
     }
-
 
     /*
     // 4.8.8
@@ -158,9 +354,7 @@ void PatternGenerator::ConcatNGon(std::vector<AVector> sourcePolygon, std::vecto
 void PatternGenerator::MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape)
 {
     for(int a = 0; a < shape.size(); a++)
-    {
-        shape[a] = MultiplyVector(mat, shape[a]);
-    }
+        { shape[a] = MultiplyVector(mat, shape[a]); }
 }
 
 AVector PatternGenerator::MultiplyVector(QMatrix3x3 mat, AVector vec)
@@ -186,10 +380,7 @@ std::vector<AVector> PatternGenerator::GenerateNGon(float sides, float radius, f
 
 void PatternGenerator::PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol)
 {
-    if(linesVao->isCreated())
-    {
-        linesVao->destroy();
-    }
+    if(linesVao->isCreated()) { linesVao->destroy(); }
 
     linesVao->create();
     linesVao->bind();

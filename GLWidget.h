@@ -1,6 +1,8 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#include <iostream>
+
 #include <QMatrix4x4>
 #include <QtOpenGL/QGLWidget>
 #include <QOpenGLVertexArrayObject>
@@ -30,16 +32,15 @@ private:
 
     PatternGenerator* _patternGenerator;
 
-    std::vector<ALine> _tilingLines;
-
     // points
     std::vector<AVector>        _points;
     QOpenGLBuffer               _pointsVbo;
     QOpenGLVertexArrayObject    _pointsVao;
 
     // lines
-    QOpenGLBuffer               _tilingLinesVbo;
-    QOpenGLVertexArrayObject    _tilingLinesVao;
+    //std::vector<ALine>          _tilingLines;
+    //QOpenGLBuffer               _tilingLinesVbo;
+    //QOpenGLVertexArrayObject    _tilingLinesVao;
 
     // for rendering
     int         _mvpMatrixLocation;
@@ -56,12 +57,11 @@ private:
 
     void SaveToSvg();
 
-     void InitTiling();
-
-    std::vector<AVector> GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
-    void ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
-    AVector MultiplyVector(QMatrix3x3 mat, AVector vec);
-    void MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
+    //void InitTiling();
+    //std::vector<AVector> GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
+    //void ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
+    //AVector MultiplyVector(QMatrix3x3 mat, AVector vec);
+    //void MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
 
     void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
     void PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
@@ -109,6 +109,20 @@ public:
     void mouseReleaseEvent(int x, int y);
     // mouse double click
     void mouseDoubleClick(int x, int y);
+
+    void IncreaseDiv()
+    {
+        std::cout << "increase\n";
+        _patternGenerator->sideDiv += 1;
+        _patternGenerator->InitTiling2();
+    }
+
+    void DecreaseDiv()
+    {
+        std::cout << "decrease\n";
+        _patternGenerator->sideDiv -= 1;
+        _patternGenerator->InitTiling2();
+    }
 };
 
 #endif // GLWIDGET_H

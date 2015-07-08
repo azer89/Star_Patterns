@@ -25,9 +25,9 @@ HEADERS  += mainwindow.h \
     GLContainer.h \
     GLWidget.h \
     VertexData.h \
-    Tiling.h \
     tinyxml2.h \
-    PatternGenerator.h
+    PatternGenerator.h \
+    TilingData.h
 
 FORMS    += mainwindow.ui
 
