@@ -65,15 +65,9 @@ void PatternGenerator::ReadXML(std::string filename)
             {
                 sType = ShapeType::S_REGULAR;
                 tileData._sides = std::stof(shapeElement->Attribute("sides"));
-
-                //if(tileData._sides == 5)
-                //{
-                //    std::cout << "sides 5\n";
-                //}
             }
             else if(typeStr == "polygon")
             {
-                //std::cout << "polygon\n";
                 sType = ShapeType::S_POLYGON;
 
                 for( XMLNode* vertexNode = shapeNode->FirstChildElement("vertex");
@@ -140,23 +134,59 @@ TilingData PatternGenerator::GetTiling(std::string tilingName)
     return tilingData;
 }
 
-void PatternGenerator::InitTiling2()
+void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes)
 {
+    _rayLines.clear();
+
+    float angle1 = -M_PI / 4.0f;
+    float cos1 = cos(angle1);
+    float sin1 = sin(angle1);
+
+    for(int a = 0; a < shapes.size(); a++)
+    {
+        //std::cout << a << "\n";
+        std::vector<ALine> aShape = shapes[a];
+        for(int b = 0; b < aShape.size(); b++)
+        {
+            ALine aLine = aShape[b];
+            AVector dirVec = (aLine.GetPointB() - aLine.GetPointA()).Norm();
+            AVector midPoint = (aLine.GetPointB() - aLine.GetPointA()) * 0.5 + aLine.GetPointA();
+
+            // rotate
+            AVector dirVecRotated;
+            dirVecRotated.x = cos1 * dirVec.x - sin1 * dirVec.y;
+            dirVecRotated.y = sin1 * dirVec.x + cos1 * dirVec.y;
+
+            ALine aRay(midPoint.x, midPoint.y, midPoint.x + dirVecRotated.x * 0.5, midPoint.y + dirVecRotated.y * 0.5);
+            _rayLines.push_back(aRay);
+
+        }
+        //AVector midPoint =
+    }
+    PrepareLinesVAO(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0.0, 1.0, 0.0));
+}
+
+void PatternGenerator::InitTiling()
+{
+    _shapes.clear();
     _tilings.clear();
+
     ReadXML("../IslamicStarPatterns/archimedeans.xml");
     ReadXML("../IslamicStarPatterns/hanbury.xml");
 
-
+    // rendering-related
     _tilingLines.clear();
 
-    TilingData tilingData = GetTiling("alhambra RD");
+
+    TilingData tilingData = GetTiling("6.6.6");
     AVector trans1 = tilingData._translation1;
     AVector trans2 = tilingData._translation2;
     AVector centerPt(this->_img_width / 2, this->_img_height / 2);
-    std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
-    for(int a = 0; a < 10; a++)
+    //AVector centerPt(0, 0);
+    //std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
+    for(int a = 0; a < 1; a++)
     {
-        for(int b = 0; b < 10; b++)
+        for(int b = 0; b < 1; b++)
         {
             for(int c = 0; c < tilingData._tiles.size(); c++)
             {
@@ -196,7 +226,9 @@ void PatternGenerator::InitTiling2()
                     AVector pos = centerPt + trans1 * a + trans2 * b;
                     for(int i = 0; i < tempShape.size(); i++)
                         { tempShape[i] += pos; }
+
                     ConcatNGon(tempShape, _tilingLines);
+                    ConcatShapes(tempShape, _shapes);
                 }
                 //std::vector<AVector> shape = GenerateNGon(sides, radius, angleOffset, AVector(0, 0));
                 //MultiplyShape(tileData.);
@@ -204,6 +236,9 @@ void PatternGenerator::InitTiling2()
             }
         }
     }
+
+    InferenceAlgorithm(_shapes);
+
     PrepareLinesVAO(_tilingLines, &_tilingLinesVbo, &_tilingLinesVao, QVector3D(1.0, 0.0, 0.0));
 }
 
@@ -218,6 +253,14 @@ void PatternGenerator::Paint()
         glDrawArrays(GL_LINES, 0, _tilingLines.size() * 2);
         _tilingLinesVao.release();
     }
+
+    if(_rayLines.size() != 0)
+    {
+        glLineWidth(2.0f);
+        _rayLinesVao.bind();
+        glDrawArrays(GL_LINES, 0, _rayLines.size() * 2);
+        _rayLinesVao.release();
+    }
 }
 
 void PatternGenerator::ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines)
@@ -227,6 +270,18 @@ void PatternGenerator::ConcatNGon(std::vector<AVector> sourcePolygon, std::vecto
         destinationLines.push_back(ALine(sourcePolygon[a],
                                          sourcePolygon[(a + 1) % sourcePolygon.size()]));
     }
+}
+
+void PatternGenerator::ConcatShapes(std::vector<AVector> sourcePolygon, std::vector<std::vector<ALine>> &shapes)
+{
+    std::vector<ALine> tempShape;
+    for(uint a = 0; a < sourcePolygon.size(); a++)
+    {
+        tempShape.push_back(ALine(sourcePolygon[a],
+                              sourcePolygon[(a + 1) % sourcePolygon.size()]));
+    }
+    shapes.push_back(tempShape);
+
 }
 
 void PatternGenerator::MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape)

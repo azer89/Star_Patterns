@@ -19,12 +19,14 @@ public:
     ~PatternGenerator();
 
     //void InitTiling1();
-    void InitTiling2();
+    void InitTiling();
     void Paint();
 
 private:
     std::vector<AVector>    GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
     void                    ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
+    void                    ConcatShapes(std::vector<AVector> sourcePolygon, std::vector<std::vector<ALine>>  &shapes);
+    void                    InferenceAlgorithm(std::vector<std::vector<ALine>> shapes);
     AVector                 MultiplyVector(QMatrix3x3 mat, AVector vec);
     void                    MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
     void                    ReadXML(std::string filename);
@@ -46,16 +48,17 @@ public:
 
 
 private:
-    std::vector<ALine>          _tilingLines;
-    QOpenGLBuffer               _tilingLinesVbo;
-    QOpenGLVertexArrayObject    _tilingLinesVao;
+    std::vector<ALine>              _rayLines;
+    QOpenGLBuffer                   _rayLinesVbo;
+    QOpenGLVertexArrayObject        _rayLinesVao;
+
+    std::vector<ALine>              _tilingLines;
+    QOpenGLBuffer                   _tilingLinesVbo;
+    QOpenGLVertexArrayObject        _tilingLinesVao;
 
     std::vector<TilingData>         _tilings;
 
-    std::vector<std::vector<ALine>>          _shapes;
-
-
-
+    std::vector<std::vector<ALine>> _shapes;
 };
 
 #endif // PATTERNGENERATOR_H
