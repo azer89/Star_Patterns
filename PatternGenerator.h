@@ -18,7 +18,7 @@ public:
     PatternGenerator();
     ~PatternGenerator();
 
-    void InitTiling1();
+    //void InitTiling1();
     void InitTiling2();
     void Paint();
 
@@ -42,7 +42,7 @@ public:
     int         _img_height;
 
     // to do: delete me
-    float sideDiv;
+    //float sideDiv;
 
 
 private:
@@ -51,6 +51,8 @@ private:
     QOpenGLVertexArrayObject    _tilingLinesVao;
 
     std::vector<TilingData>         _tilings;
+
+    std::vector<std::vector<ALine>>          _shapes;
 
 
 

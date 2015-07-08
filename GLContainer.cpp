@@ -309,7 +309,7 @@ void GLContainer::keyPressEvent(QKeyEvent *event)
         QApplication::setOverrideCursor(Qt::OpenHandCursor);
     }
 
-    if(event->key() == Qt::Key_Right)
+    /*if(event->key() == Qt::Key_Right)
     {
         //std::cout << "right\n";
         _glWidget->IncreaseDiv();
@@ -318,7 +318,7 @@ void GLContainer::keyPressEvent(QKeyEvent *event)
     {
         //std::cout << "left\n";
         _glWidget->DecreaseDiv();
-    }
+    }*/
 
     //if(event->key() == Qt::Key_C) { this->glWidget->DoClustering(); }
 

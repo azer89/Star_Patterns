@@ -110,19 +110,19 @@ public:
     // mouse double click
     void mouseDoubleClick(int x, int y);
 
-    void IncreaseDiv()
+    /*void IncreaseDiv()
     {
         std::cout << "increase\n";
         _patternGenerator->sideDiv += 1;
         _patternGenerator->InitTiling2();
-    }
+    }*/
 
-    void DecreaseDiv()
+    /*void DecreaseDiv()
     {
         std::cout << "decrease\n";
         _patternGenerator->sideDiv -= 1;
         _patternGenerator->InitTiling2();
-    }
+    }*/
 };
 
 #endif // GLWIDGET_H
