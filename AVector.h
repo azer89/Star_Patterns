@@ -32,6 +32,14 @@ public:
         //this->index = -1;
     }
 
+    // Constructor
+    /*AVector(AVector otherVector)
+    {
+        this->x = otherVector.x;
+        this->y = otherVector.y;
+        //this->index = -1;
+    }*/
+
     // Scale a point
     AVector Resize(float val)
     {

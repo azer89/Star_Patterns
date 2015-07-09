@@ -15,7 +15,7 @@
 GLWidget::GLWidget(QGLFormat format, QWidget *parent) :
     QGLWidget(format, parent),
     _isMouseDown(false),
-    _zoomFactor(30.0),
+    _zoomFactor(50.0),
     _shaderProgram(0),
     _patternGenerator(0),
     _img_width(50),
@@ -167,10 +167,8 @@ void GLWidget::mouseDoubleClick(int x, int y)
 
 void GLWidget::HorizontalScroll(int val) { _scrollOffset.setX(val); }
 void GLWidget::VerticalScroll(int val) { _scrollOffset.setY(val); }
-void GLWidget::ZoomIn() { this->_zoomFactor += 0.5f; }
-void GLWidget::ZoomOut() { this->_zoomFactor -= 0.5f; if(this->_zoomFactor < 0.1f) _zoomFactor = 0.1f; }
-
-
+void GLWidget::ZoomIn() { this->_zoomFactor += 10.0f; }
+void GLWidget::ZoomOut() { this->_zoomFactor -= 10.0f; if(this->_zoomFactor < 1.0f) _zoomFactor = 1.0f; }
 
 void GLWidget::InitCurve()
 {

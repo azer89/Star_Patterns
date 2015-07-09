@@ -1,6 +1,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <algorithm>
 
 #include "tinyxml2.h"
 
@@ -79,6 +80,8 @@ void PatternGenerator::ReadXML(std::string filename)
                                                          std::stof(vertexElement->Attribute("y"))));
                     //std::cout << "v " << std::stof(vertexElement->Attribute("x")) << " " << std::stof(vertexElement->Attribute("y")) << "\n";
                 }
+                // to do: why reverse ?
+                std::reverse(tileData._vertices.begin(), tileData._vertices.end());
             }
 
             tileData._shapeType = sType;
@@ -139,31 +142,98 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
     _rayLines.clear();
 
     float angle1 = -M_PI / 4.0f;
+    float angle2 = -M_PI - angle1;
+    float angle3 = -M_PI / 2.0f;    // debug
+
     float cos1 = cos(angle1);
     float sin1 = sin(angle1);
+    float cos2 = cos(angle2);
+    float sin2 = sin(angle2);
+    float cos3 = cos(angle3);   // debug
+    float sin3 = sin(angle3);   // debug
 
     for(int a = 0; a < shapes.size(); a++)
     {
         //std::cout << a << "\n";
         std::vector<ALine> aShape = shapes[a];
+        std::vector<ALine> sRays;
+
         for(int b = 0; b < aShape.size(); b++)
         {
             ALine aLine = aShape[b];
+
+            //std::cout << aLine.Magnitude() << "\n";
+            //if(aLine.Magnitude() < std::numeric_limits<float>::epsilon() * 1000)
+            //{
+            //    //continue;
+            //}
+
+            // debug
+            /*
+            AVector dirVec = (aLine.GetPointB() - aLine.GetPointA()).Norm();
+            AVector perpVector;
+            perpVector.x = cos3 * dirVec.x - sin3 * dirVec.y;
+            perpVector.y = sin3 * dirVec.x + cos3 * dirVec.y;
+            AVector midPoint = (aLine.GetPointB() - aLine.GetPointA()) * 0.5 + aLine.GetPointA();
+            midPoint = midPoint + perpVector * 0.025;
+
+            // a right ray
+            AVector dirVecRotated1;
+            dirVecRotated1.x = cos1 * dirVec.x - sin1 * dirVec.y;
+            dirVecRotated1.y = sin1 * dirVec.x + cos1 * dirVec.y;
+            ALine aRay1(midPoint.x,
+                        midPoint.y,
+                        midPoint.x + dirVecRotated1.x * 0.1,
+                        midPoint.y + dirVecRotated1.y * 0.1);
+            _rayLines.push_back(aRay1);
+
+            // a left ray
+            AVector dirVecRotated2;
+            dirVecRotated2.x = cos2 * dirVec.x - sin2 * dirVec.y;
+            dirVecRotated2.y = sin2 * dirVec.x + cos2 * dirVec.y;
+            ALine aRay2(midPoint.x,
+                        midPoint.y,
+                        midPoint.x + dirVecRotated2.x * 0.1,
+                        midPoint.y + dirVecRotated2.y * 0.1);
+            _rayLines.push_back(aRay2);
+            */
+
             AVector dirVec = (aLine.GetPointB() - aLine.GetPointA()).Norm();
             AVector midPoint = (aLine.GetPointB() - aLine.GetPointA()) * 0.5 + aLine.GetPointA();
 
-            // rotate
-            AVector dirVecRotated;
-            dirVecRotated.x = cos1 * dirVec.x - sin1 * dirVec.y;
-            dirVecRotated.y = sin1 * dirVec.x + cos1 * dirVec.y;
+            // a right ray
+            AVector dirVecRotated1;
+            dirVecRotated1.x = cos1 * dirVec.x - sin1 * dirVec.y;
+            dirVecRotated1.y = sin1 * dirVec.x + cos1 * dirVec.y;
+            ALine aRay1(midPoint.x, midPoint.y, midPoint.x + dirVecRotated1.x * 0.1, midPoint.y + dirVecRotated1.y * 0.1);
+            sRays.push_back(aRay1);
+            _rayLines.push_back(aRay1);
 
-            ALine aRay(midPoint.x, midPoint.y, midPoint.x + dirVecRotated.x * 0.5, midPoint.y + dirVecRotated.y * 0.5);
-            _rayLines.push_back(aRay);
-
+            // a left ray
+            AVector dirVecRotated2;
+            dirVecRotated2.x = cos2 * dirVec.x - sin2 * dirVec.y;
+            dirVecRotated2.y = sin2 * dirVec.x + cos2 * dirVec.y;
+            ALine aRay2(midPoint.x, midPoint.y, midPoint.x + dirVecRotated2.x * 0.1, midPoint.y + dirVecRotated2.y * 0.1);
+            sRays.push_back(aRay2);
+            _rayLines.push_back(aRay2);
         }
-        //AVector midPoint =
+
+
+        // inference algorithm here
+        std::vector<std::pair<ALine, ALine>> rayCombination;
+        for(int a = 0; a < sRays.size(); a++)
+        {
+            for(int b = a + 1; b < sRays.size(); b++)
+            {
+                std::pair<ALine, ALine> aPair(sRays[a], sRays[b]);
+                rayCombination.push_back(aPair);
+            }
+        }
+
+
+
     }
-    PrepareLinesVAO(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0.0, 1.0, 0.0));
+    PrepareLinesVAO(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0.0, 0.0, 0.0));
 }
 
 void PatternGenerator::InitTiling()
@@ -176,7 +246,6 @@ void PatternGenerator::InitTiling()
 
     // rendering-related
     _tilingLines.clear();
-
 
     TilingData tilingData = GetTiling("6.6.6");
     AVector trans1 = tilingData._translation1;
@@ -227,8 +296,11 @@ void PatternGenerator::InitTiling()
                     for(int i = 0; i < tempShape.size(); i++)
                         { tempShape[i] += pos; }
 
+                    //if(tileData._shapeType == ShapeType::S_POLYGON)
+                    //{
                     ConcatNGon(tempShape, _tilingLines);
                     ConcatShapes(tempShape, _shapes);
+                    //}
                 }
                 //std::vector<AVector> shape = GenerateNGon(sides, radius, angleOffset, AVector(0, 0));
                 //MultiplyShape(tileData.);
@@ -301,13 +373,24 @@ AVector PatternGenerator::MultiplyVector(QMatrix3x3 mat, AVector vec)
 std::vector<AVector> PatternGenerator::GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt)
 {
     std::vector<AVector> shape;
-    float addValue = (M_PI * 2.0 / (float)sides);
-    for(float a = angleOffset; a < M_PI * 2.0 + angleOffset; a += addValue)
+    float addValue = M_PI * 2.0 / sides;
+    float valLimit = M_PI * 2.0 + angleOffset;
+    float epsilonLimit = std::numeric_limits<float>::epsilon() * 1000;
+    for(float a = angleOffset; (valLimit - a) > epsilonLimit; a += addValue)
     {
         float xPt = centerPt.x + radius * sin(a);
         float yPt = centerPt.y + radius * cos(a);
         shape.push_back(AVector(xPt, yPt));
     }
+
+    //std::cout << "GenerateNGon " << shape[shape.size() - 1].Distance(shape[0]) << "\n";
+    //std::cout << "GenerateNGon " << shape.size() << "\n";
+    int intSides = (int)sides;
+    if(intSides != shape.size())
+    {
+        std::cout << "GenerateNGon error\n";
+    }
+
     return shape;
 }
 
