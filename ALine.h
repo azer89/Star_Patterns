@@ -16,12 +16,17 @@ public:
     //int index1;
     //int index2;
 
+    bool    _isRight;
+    int     _side;
+
     // Constructor #1
     ALine()
     {
         this->XA = -1;	this->YA = -1;
         this->XB = -1;	this->YB = -1;
 
+        this->_isRight = false;
+        this->_side = -1;
         //this->index1 = -1;
         //this->index2 = -1;
     }
@@ -32,11 +37,13 @@ public:
         this->XA = XA;	this->YA = YA;
         this->XB = XB;	this->YB = YB;
 
+        this->_isRight = false;
+        this->_side = -1;
         //this->index1 = -1;
         //this->index2 = -1;
     }
 
-    // Constructor #3
+    // Constructor #X
     /*ALine(ALine otherLine)
     {
         this->XA = otherLine.XA;	this->YA = otherLine.YA;
@@ -46,11 +53,26 @@ public:
         //this->index2 = -1;
     }*/
 
+    // Constructor #3
     ALine(AVector v1, AVector v2)
     {
         this->XA = v1.x;	this->YA = v1.y;
         this->XB = v2.x;	this->YB = v2.y;
 
+        this->_isRight = false;
+        this->_side = -1;
+        //this->index1 = -1;
+        //this->index2 = -1;
+    }
+
+    // Constructor #4
+    ALine(AVector v1, AVector v2, bool isRight, int side)
+    {
+        this->XA = v1.x;	this->YA = v1.y;
+        this->XB = v2.x;	this->YB = v2.y;
+
+        this->_isRight = isRight;
+        this->_side = side;
         //this->index1 = -1;
         //this->index2 = -1;
     }
@@ -123,5 +145,23 @@ public:
         return 0;
     }
 };
+
+// for comparison
+struct LessThanLineMagnitude
+{
+    bool operator() (ALine i, ALine j)
+    {
+        return (i.Magnitude() < j.Magnitude());
+    }
+};
+
+struct LessThanLineMagnitudePair
+{
+    bool operator() (std::pair<ALine, ALine> i, std::pair<ALine, ALine> j)
+    {
+        return ( (i.first.Magnitude() + i.second.Magnitude())  <  (j.first.Magnitude() + j.second.Magnitude()) );
+    }
+};
+
 
 #endif // ALINE_H

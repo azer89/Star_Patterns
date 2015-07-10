@@ -27,7 +27,8 @@ HEADERS  += mainwindow.h \
     VertexData.h \
     tinyxml2.h \
     PatternGenerator.h \
-    TilingData.h
+    TilingData.h \
+    ARay.h
 
 FORMS    += mainwindow.ui
 
