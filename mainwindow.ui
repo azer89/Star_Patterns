@@ -50,6 +50,144 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <widget class="QDockWidget" name="dockWidget_2">
+   <property name="minimumSize">
+    <size>
+     <width>200</width>
+     <height>115</height>
+    </size>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_2">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="0" column="0">
+      <widget class="QTreeWidget" name="treeWidget">
+       <column>
+        <property name="text">
+         <string>Tilings</string>
+        </property>
+       </column>
+       <item>
+        <property name="text">
+         <string>Archimedeans</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
+        <item>
+         <property name="text">
+          <string>3.3.3.3.3.3</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.3.3.3.6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.3.4.3.4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.4.6.4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.3.3.4.4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.6.3.6</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.12.12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4.4.4.4</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4.6.12</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4.8.8</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>6.6.6</string>
+         </property>
+        </item>
+       </item>
+       <item>
+        <property name="text">
+         <string>Hanbury Tilings</string>
+        </property>
+        <property name="flags">
+         <set>ItemIsDragEnabled|ItemIsUserCheckable|ItemIsEnabled</set>
+        </property>
+        <item>
+         <property name="text">
+          <string>10 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8.12 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>9.12 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.4.12 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4.8.8 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>3.12.12 RD</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>alhambra RD</string>
+         </property>
+        </item>
+       </item>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>

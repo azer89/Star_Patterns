@@ -20,6 +20,7 @@ public:
 
     //void InitTiling1();
     void InitTiling();
+    void GeneratePattern(std::string tilingName);
     void Paint();
 
 private:

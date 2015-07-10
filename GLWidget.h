@@ -110,6 +110,8 @@ public:
     // mouse double click
     void mouseDoubleClick(int x, int y);
 
+    void GeneratePattern(std::string tilingName);
+
     /*void IncreaseDiv()
     {
         std::cout << "increase\n";

@@ -262,8 +262,6 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
         std::sort (lineCombination.begin(), lineCombination.end(), LessThanLineMagnitudePair());
         while(counter < sides)
         {
-
-
             //std::cout << sides << " " << counter << " " << "\n";
             ALine aLine1 = lineCombination[0].first;
             ALine aLine2 = lineCombination[0].second;
