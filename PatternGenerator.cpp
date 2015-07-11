@@ -8,6 +8,7 @@
 #include "ARay.h"
 #include "VertexData.h"
 #include "PatternGenerator.h"
+#include "SystemParams.h"
 
 
 PatternGenerator::PatternGenerator()
@@ -142,7 +143,7 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
 
     float eps_val = std::numeric_limits<float>::epsilon() * 1000.0f;
 
-    float angle1 = -M_PI / 4.0f;
+    float angle1 = -SystemParams::rad_angle;
     float angle2 = -M_PI - angle1;
 
     float cos1 = cos(angle1);
@@ -307,7 +308,9 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             counter++;
         }
     }
-    PrepareLinesVAO2(_rayLines, &_rayLinesVbo, &_rayLinesVao);
+
+    PrepareLinesVAO1(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0, 0, 0));
+    //PrepareLinesVAO2(_rayLines, &_rayLinesVbo, &_rayLinesVao);
 }
 
 bool PatternGenerator::CheckHorizontalVerticalCase(ALine ray1, ALine ray2)
@@ -409,9 +412,9 @@ void PatternGenerator::GeneratePattern(std::string tilingName)
     AVector centerPt(this->_img_width / 2, this->_img_height / 2);
     //AVector centerPt(0, 0);
     //std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
-    for(int a = 0; a < 10; a++)
+    for(int a = 0; a < SystemParams::w; a++)
     {
-        for(int b = 0; b < 10; b++)
+        for(int b = 0; b < SystemParams::h; b++)
         {
             for(int c = 0; c < tilingData._tiles.size(); c++)
             {

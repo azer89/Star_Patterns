@@ -17,7 +17,8 @@ SOURCES += main.cpp\
     GLContainer.cpp \
     GLWidget.cpp \
     tinyxml2.cpp \
-    PatternGenerator.cpp
+    PatternGenerator.cpp \
+    SystemParams.cpp
 
 HEADERS  += mainwindow.h \
     ALine.h \
@@ -28,7 +29,8 @@ HEADERS  += mainwindow.h \
     tinyxml2.h \
     PatternGenerator.h \
     TilingData.h \
-    ARay.h
+    ARay.h \
+    SystemParams.h
 
 FORMS    += mainwindow.ui
 

@@ -21,6 +21,7 @@ private:
 
 private slots:
     void ItemClicked(QTreeWidgetItem * item, int column);
+    void ParamsChanged();
 };
 
 #endif // MAINWINDOW_H
