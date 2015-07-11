@@ -486,7 +486,7 @@ void PatternGenerator::Paint()
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
 
-    if(_tilingLines.size() != 0)
+    if(_tilingLines.size() != 0 && SystemParams::show_tiling)
     {
         glLineWidth(1.0f);
         _tilingLinesVao.bind();

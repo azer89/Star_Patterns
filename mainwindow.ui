@@ -67,6 +67,9 @@
      </item>
      <item row="3" column="1">
       <widget class="QSpinBox" name="wSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
         <number>100</number>
        </property>
@@ -77,6 +80,9 @@
      </item>
      <item row="3" column="3">
       <widget class="QSpinBox" name="hSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
        <property name="maximum">
         <number>100</number>
        </property>
@@ -239,7 +245,7 @@
       </widget>
      </item>
      <item row="5" column="0" colspan="4">
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="tilingCheckBox">
        <property name="text">
         <string>Show Tiling</string>
        </property>

@@ -11,6 +11,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*, int )),    this, SLOT(ItemClicked(QTreeWidgetItem*, int)));
     connect(ui->angleSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
+    connect(ui->wSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
+    connect(ui->hSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
+    connect(ui->tilingCheckBox,	 SIGNAL(stateChanged(int)), this, SLOT(ParamsChanged()));
 }
 
 MainWindow::~MainWindow()
@@ -22,9 +25,10 @@ void MainWindow::ParamsChanged()
 {
     float degAngle = ui->angleSpinBox->value();
     float radAngle = degAngle * M_PI / 180.0;
-    //std::cout << degAngle << " " << radAngle << "\n";
-
     SystemParams::rad_angle = radAngle;
+    SystemParams::w = ui->wSpinBox->value();
+    SystemParams::h = ui->hSpinBox->value();
+    SystemParams::show_tiling = ui->tilingCheckBox->isChecked();
 
     std::string tilingName;
     if(ui->treeWidget->selectedItems().size() > 0)
