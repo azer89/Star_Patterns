@@ -297,6 +297,30 @@
   </tile>
 
 </tiling>
+
+<tiling name="test">
+  <translations>
+    <vector x="2.0" y="0.0"/>
+    <vector x="0.0" y="2.0"/>
+  </translations>
+
+  <tile>
+    <shape type="polygon">
+      <vertex x="-1.0" y="-8.256821972439631E-33" contact="0.6339745962155615"/>
+      <vertex x="-0.7886751345948129" y="-0.21132486540518708" contact="0.42935973380357567"/>
+      <vertex x="-0.5425821165873717" y="-0.14538443996715517"/>
+      <vertex x="-0.5425821165873714" y="0.14538443996715575" contact="0.5706402661964248"/>
+      <vertex x="-0.7886751345948129" y="0.21132486540518708" contact="0.3660254037844385"/>
+    </shape>
+    <transform
+      a="1.0" b="0.0" c="0.0"
+      d="0.0" e="1.0" f="0.0"/>
+  </tile>
+
+
+
+</tiling>
+
 <tiling name="8 RD">
 
   <translations>

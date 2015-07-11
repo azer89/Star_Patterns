@@ -32,6 +32,9 @@ private:
     void                    MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
     void                    ReadXML(std::string filename);
     TilingData              GetTiling(std::string tilingName);
+    //bool                    IsCollinear(AVector pt1, AVector pt2, AVector pt3);
+    bool CheckCollinearCase(ALine ray1, ALine ray2);
+    bool CheckHorizontalVerticalCase(ALine ray1, ALine ray2);
 
     void PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
     void PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao);

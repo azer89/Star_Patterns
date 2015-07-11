@@ -35,3 +35,7 @@ FORMS    += mainwindow.ui
 QMAKE_CXXFLAGS += -frounding-math -O3
 
 QMAKE_CXXFLAGS += -std=gnu++1y
+
+OTHER_FILES += \
+    archimedeans.xml \
+    hanbury.xml

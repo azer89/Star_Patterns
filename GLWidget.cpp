@@ -66,7 +66,7 @@ void GLWidget::initializeGL()
     _patternGenerator->_img_width = _img_width;
     _patternGenerator->_img_height = _img_height;
     _patternGenerator->InitTiling();
-    _patternGenerator->GeneratePattern("4.8.8 RD");
+    _patternGenerator->GeneratePattern("3.4.12 RD");
 }
 
 void GLWidget::GeneratePattern(std::string tilingName)

@@ -64,6 +64,11 @@ public:
         return AVector(this->x / vlength, this->y / vlength);
     }
 
+    AVector Inverse()
+    {
+        return AVector(-this->x, -this->y);
+    }
+
     // Euclidean distance
     float Distance(AVector other)
     {
