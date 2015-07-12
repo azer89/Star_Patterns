@@ -17,5 +17,5 @@ int SystemParams::w = 1;
 int SystemParams::h = 1;
 
 QVector3D SystemParams::ribbon_color = QVector3D(0, 0, 1);
-QVector3D SystemParams::line_color = QVector3D(1, 0, 0);
+QVector3D SystemParams::line_color = QVector3D(1, 1, 0);
 

@@ -160,10 +160,6 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
         int sides = aShape.size();
         std::vector<ALine> sRays;
 
-        //std::vector<ALine> rRays;
-        //std::vector<ALine> lRays;
-
-
         for(int b = 0; b < aShape.size(); b++)
         {
             ALine aLine = aShape[b];
@@ -176,27 +172,13 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             dirVecRotated1.x = cos1 * dirVec.x - sin1 * dirVec.y;
             dirVecRotated1.y = sin1 * dirVec.x + cos1 * dirVec.y;
             sRays.push_back(ALine(midPoint, dirVecRotated1.Norm(), true, b));
-            //rRays.push_back(ALine(midPoint, midPoint + dirVecRotated1.Norm() * 0.5, true, b));
 
             // a left ray
             AVector dirVecRotated2;
             dirVecRotated2.x = cos2 * dirVec.x - sin2 * dirVec.y;
             dirVecRotated2.y = sin2 * dirVec.x + cos2 * dirVec.y;
             sRays.push_back(ALine(midPoint, dirVecRotated2.Norm(), false, b));
-            //lRays.push_back(ALine(midPoint, midPoint + dirVecRotated2.Norm()  * 0.5, false, b));
         }
-
-        /*
-        ALine aLine1 = rRays[0];
-        ALine aLine2 = lRays[1];
-        AVector dir1 = ( aLine1.GetPointB() - aLine1.GetPointA() ).Norm();
-        AVector dir2 = ( aLine2.GetPointB() - aLine2.GetPointA() ).Norm();
-        //std::cout << dir1.x  << "   " << dir1.y << "   " << dir2.x  << "   " << dir2.y << "\n";
-        _rayLines.push_back(aLine1);
-        _rayLines.push_back(aLine2);
-        std::cout << "dude\n";
-        CheckCollinearCase(ALine(aLine1.GetPointA(), dir1), ALine(aLine2.GetPointA(), dir2));
-        */
 
         // create combinations
         std::vector<std::pair<ALine, ALine>> rayCombination;
@@ -212,14 +194,11 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
                     std::pair<ALine, ALine> aPair(line1, line2);
                     rayCombination.push_back(aPair);
                 }
-                else
+                else // flip
                 {
                     std::pair<ALine, ALine> aPair(line2, line1);
                     rayCombination.push_back(aPair);
                 }
-
-                //std::pair<ALine, ALine> aPair(sRays[a], sRays[b]);
-                //rayCombination.push_back(aPair);
             }
         }
 
@@ -250,9 +229,6 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
                 aLine2._isRight = rayB._isRight;
                 aLine2._side = rayB._side;
 
-                //_rayLines.push_back(aLine1);
-                //_rayLines.push_back(aLine2);
-
                 lineCombination1.push_back(std::pair<ALine, ALine>(aLine1, aLine2));
             }
             else if(CheckCollinearCase(rayA, rayB) || CheckHorizontalVerticalCase(rayA, rayB))
@@ -268,49 +244,20 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
                 aLine2._side = rayB._side;
 
                 lineCombination1.push_back(std::pair<ALine, ALine>(aLine1, aLine2));
-
-                //lineCombination1.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
             }
-            //else if(CheckHorizontalVerticalCase(rayA, rayB))
-            //{
-            //    AVector midPoint = rayA.GetPointA() + (rayB.GetPointA() - rayA.GetPointA()) * 0.5f;
-            //    lineCombination1.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
-            //}
         }
 
         std::sort (lineCombination1.begin(), lineCombination1.end(), LessThanLineMagnitudePair());
-        //ALine aLine1 = lineCombination1[3].first;
-        //ALine aLine2 = lineCombination1[3].second;
-        //_rayLines.push_back(aLine1);
-        //_rayLines.push_back(aLine2);
-        /*for(int a = 0; a < 4; a++)
-        {
-            ALine aLine1 = lineCombination1[a].first;
-            ALine aLine2 = lineCombination1[a].second;
-            _rayLines.push_back(aLine1);
-            _rayLines.push_back(aLine2);
-
-            std::cout << aLine1._isRight << " " << aLine1._side << "\n";
-            std::cout << aLine2._isRight << " " << aLine2._side << "\n";
-            std::cout << "\n";
-        }*/
 
         int counter = 0;
         std::vector<std::pair<ALine, ALine>> lineCombination2;
         while(counter < sides)
         {
-            //std::sort (lineCombination1.begin(), lineCombination1.end(), LessThanLineMagnitudePair());
 
-            //std::cout << sides << " " << counter << " " << "\n";
             ALine aLine1 = lineCombination1[0].first;
             ALine aLine2 = lineCombination1[0].second;
 
             lineCombination2.push_back(lineCombination1[0]);
-
-            //_rayLines.push_back(aLine1);
-            //_rayLines.push_back(aLine2);
-
-            //lineCombination.erase (lineCombination.begin());
 
             for(int i = lineCombination1.size() - 1; i >= 0; i--)
             {
@@ -336,7 +283,6 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             _rayLines.push_back(aLine1);
             _rayLines.push_back(aLine2);
 
-            //CalculateInterlace(lineCombination2[a], aShape, _tempLines);
             CalculateInterlace(lineCombination2[a], aShape, _uLines, _oLines);
         }
     }
@@ -349,6 +295,9 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
 
     PrepareQuadsVAO(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
     PrepareQuadsVAO(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
+
+    PrepareLinesVAO1(_uLines, &_uLinesVbo, &_uLinesVao, SystemParams::line_color);
+    PrepareLinesVAO1(_oLines, &_oLinesVbo, &_oLinesVao, SystemParams::line_color);
 }
 
 void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines)
@@ -505,29 +454,18 @@ bool PatternGenerator::CheckCollinearCase(ALine ray1, ALine ray2)
     return false;
 }
 
-/*
-bool PatternGenerator::IsCollinear(AVector pt1, AVector pt2, AVector pt3)
-{
-    float mat[3][3];
-    mat[0][0] = pt1.x;  mat[0][1] = pt1.y;  mat[0][2] = 1;
-    mat[1][0] = pt2.x;  mat[1][1] = pt2.y;  mat[1][2] = 1;
-    mat[2][0] = pt3.x;  mat[2][1] = pt3.y;  mat[2][2] = 1;
-    return false;
-}*/
 
 void PatternGenerator::GeneratePattern(std::string tilingName)
 {
     _tilingLines.clear();
     _shapes.clear();
 
-    // 4.4.4.4
     TilingData tilingData = GetTiling(tilingName);
 
     AVector trans1 = tilingData._translation1;
     AVector trans2 = tilingData._translation2;
     AVector centerPt(this->_img_width / 2, this->_img_height / 2);
-    //AVector centerPt(0, 0);
-    //std::cout << "(" << trans1.x << ", " << trans1.y << ") (" << trans2.x << ", " << trans2.y << ")\n";
+
     for(int a = 0; a < SystemParams::w; a++)
     {
         for(int b = 0; b < SystemParams::h; b++)
@@ -535,21 +473,11 @@ void PatternGenerator::GeneratePattern(std::string tilingName)
             for(int c = 0; c < tilingData._tiles.size(); c++)
             {
                 TileData tileData = tilingData._tiles[c];
-                //if(tileData._shapeType == ShapeType::S_REGULAR)
-                //{
+
                 float sides = tileData._sides;
                 float radAngle = (M_PI / (float)sides);
                 float radius = 1.0 / cos(radAngle);
                 float angleOffset = tileData.GetRotation();
-
-                /*
-                if(tileData._shapeType == ShapeType::S_REGULAR && sides == 16)
-                {
-                    //std::cout << "5 angle offset " << angleOffset << "\n";
-                    angleOffset = M_PI / sideDiv;
-                    std::cout << sideDiv << "  " << angleOffset << "\n";
-                }
-                */
 
                 std::vector<AVector> shape;
                 if(tileData._shapeType == ShapeType::S_REGULAR)
@@ -571,15 +499,9 @@ void PatternGenerator::GeneratePattern(std::string tilingName)
                     for(int i = 0; i < tempShape.size(); i++)
                         { tempShape[i] += pos; }
 
-                    //if(tileData._shapeType == ShapeType::S_POLYGON)
-                    //{
                     ConcatNGon(tempShape, _tilingLines);
                     ConcatShapes(tempShape, _shapes);
-                    //}
                 }
-                //std::vector<AVector> shape = GenerateNGon(sides, radius, angleOffset, AVector(0, 0));
-                //MultiplyShape(tileData.);
-                //}
             }
         }
     }
@@ -602,12 +524,30 @@ void PatternGenerator::Paint()
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
 
+    if(_uLinesVao.isCreated())
+    {
+        _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+        _uLinesVao.bind();
+        glLineWidth(2.0f);
+        glDrawArrays(GL_LINES, 0, _uLines.size() * 2);
+        _uLinesVao.release();
+    }
+
     if(_uQuadsVao.isCreated())
     {
         _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
         _uQuadsVao.bind();
         glDrawArrays(GL_QUADS, 0, _uLines.size() * 2);
         _uQuadsVao.release();
+    }
+
+    if(_oLinesVao.isCreated())
+    {
+        _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+        _oLinesVao.bind();
+        glLineWidth(2.0f);
+        glDrawArrays(GL_LINES, 0, _oLines.size() * 2);
+        _oLinesVao.release();
     }
 
     if(_oQuadsVao.isCreated())
