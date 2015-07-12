@@ -11,6 +11,7 @@
 #include "ALine.h"
 #include "AVector.h"
 #include "TilingData.h"
+#include "RibbonSegment.h"
 
 class PatternGenerator
 {
@@ -39,11 +40,13 @@ private:
     //bool                    IsCollinear(AVector pt1, AVector pt2, AVector pt3);
     bool CheckCollinearCase(ALine ray1, ALine ray2);
     bool CheckHorizontalVerticalCase(ALine ray1, ALine ray2);
-    void CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &tempLines);
+    void CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines);
 
     void PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2);
     void PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
     void PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao);
+
+    void PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol);
 
 // to do: fix this
 public:
@@ -67,17 +70,29 @@ private:
     QOpenGLBuffer                   _tempLinesVbo;
     QOpenGLVertexArrayObject        _tempLinesVao;
 
-    /*
-    // odd
-    std::vector<ALine>              _oLines;
-    QOpenGLBuffer                   _oLinesVbo;
-    QOpenGLVertexArrayObject        _oLinesVao;
+    // under
+    //std::vector<RibbonSegment>  _uSegments;
+    std::vector<ALine>  _uLines;
 
-    // even
-    std::vector<ALine>              _eLines;
-    QOpenGLBuffer                   _eLinesVbo;
-    QOpenGLVertexArrayObject        _eLinesVao;
-    */
+    // over
+    //std::vector<RibbonSegment>  _oSegments;
+    std::vector<ALine>  _oLines;
+
+    // lines under
+    QOpenGLBuffer               _uLinesVbo;
+    QOpenGLVertexArrayObject    _uLinesVao;
+
+    // lines over
+    QOpenGLBuffer               _oLinesVbo;
+    QOpenGLVertexArrayObject    _oLinesVao;
+
+    // quads under
+    QOpenGLBuffer               _uQuadsVbo;
+    QOpenGLVertexArrayObject    _uQuadsVao;
+
+    // quads over
+    QOpenGLBuffer               _oQuadsVbo;
+    QOpenGLVertexArrayObject    _oQuadsVao;
 
     std::vector<ALine>              _tilingLines;
     QOpenGLBuffer                   _tilingLinesVbo;

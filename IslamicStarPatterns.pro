@@ -30,7 +30,8 @@ HEADERS  += mainwindow.h \
     PatternGenerator.h \
     TilingData.h \
     ARay.h \
-    SystemParams.h
+    SystemParams.h \
+    RibbonSegment.h
 
 FORMS    += mainwindow.ui
 

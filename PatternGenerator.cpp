@@ -141,6 +141,8 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
 {
     _rayLines.clear();
     _tempLines.clear();
+    _uLines.clear();
+    _oLines.clear();
 
     float eps_val = std::numeric_limits<float>::epsilon() * 1000.0f;
 
@@ -334,22 +336,27 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             _rayLines.push_back(aLine1);
             _rayLines.push_back(aLine2);
 
-            CalculateInterlace(lineCombination2[a], aShape, _tempLines);
+            //CalculateInterlace(lineCombination2[a], aShape, _tempLines);
+            CalculateInterlace(lineCombination2[a], aShape, _uLines, _oLines);
         }
     }
 
     //PrepareLinesVAO1(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0, 0, 0));
     //PrepareLinesVAO0(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(1, 0, 0), QVector3D(0, 0, 1));
     //PrepareLinesVAO2(_tempLines, &_tempLinesVbo, &_tempLinesVao);
-    PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 0, 0));
+
+    //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 0, 0));
+
+    PrepareQuadsVAO(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
+    PrepareQuadsVAO(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
 }
 
-void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &tempLines)
+void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines)
 {
     ALine aLine1 = segment.first;
     ALine aLine2 = segment.second;
-    ALine ray1(aLine1.GetPointA(), aLine1.Direction().Norm());
-    ALine ray2(aLine2.GetPointA(), aLine2.Direction().Norm());
+    //ALine ray1(aLine1.GetPointA(), aLine1.Direction().Norm());
+    //ALine ray2(aLine2.GetPointA(), aLine2.Direction().Norm());
     AVector dir1 = aLine1.Direction().Norm();
     AVector dir2 = aLine2.Direction().Norm();
 
@@ -374,8 +381,6 @@ void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::
         AVector midPt = aLine1.GetPointB();
         cPt = midPt - midDir;
         dPt = midPt + midDir;
-
-        //tempLines.push_back(ALine(cPt, dPt));
     }
     else
     {
@@ -403,8 +408,6 @@ void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::
             cPt = midPt - midDir;
             dPt = midPt + midDir;
         }
-
-        //tempLines.push_back(ALine(cPt, dPt));
     }
 
     // start
@@ -415,8 +418,7 @@ void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::
     AVector dirVA = AVector(dirHA.y, -dirHA.x);
     AVector aPt = aLine1.GetPointA() + dirVA * hypotenuse2;
     AVector bPt = aLine1.GetPointA() + dirHA * hypotenuse2;
-    //tempLines.push_back(ALine(aLine1.GetPointA() + dirVA * hypotenuse2, aLine1.GetPointA())); // a
-    //tempLines.push_back(ALine(aLine1.GetPointA() + dirHA * hypotenuse2, aLine1.GetPointA())); // b
+    AVector bPtInv = aLine1.GetPointA() + dirHA.Inverse() * hypotenuse2;
 
     // end
     float angleX = M_PI - SystemParams::rad_angle;
@@ -427,14 +429,17 @@ void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::
     AVector dirHB = AVector(-dirX.x, -dirX.y);
     AVector ePt = aLine2.GetPointA() + dirVB * hypotenuse3;
     AVector fPt = aLine2.GetPointA() + dirHB * hypotenuse3;
-    //tempLines.push_back(ALine(aLine2.GetPointA() + dirVB * hypotenuse3, aLine2.GetPointA())); // e
-    //tempLines.push_back(ALine(aLine2.GetPointA() + dirHB * hypotenuse3, aLine2.GetPointA())); // f
+    AVector fPtInv = aLine2.GetPointA() + dirHB.Inverse() * hypotenuse3;
 
-    tempLines.push_back(ALine(aPt, cPt));
-    tempLines.push_back(ALine(bPt, dPt));
+    // under
+    //uLines.push_back(ALine(aPt, cPt));    // non interlace
+    uLines.push_back(ALine(bPtInv, cPt));   // interlace
+    uLines.push_back(ALine(bPt, dPt));
 
-    tempLines.push_back(ALine(cPt, ePt));
-    tempLines.push_back(ALine(dPt, fPt));
+    // over
+    //oLines.push_back(ALine(cPt, ePt)); // non interlace
+    oLines.push_back(ALine(cPt, fPtInv)); // interlace
+    oLines.push_back(ALine(dPt, fPt));
 }
 
 // signed
@@ -596,6 +601,22 @@ void PatternGenerator::InitTiling()
 void PatternGenerator::Paint()
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+
+    if(_uQuadsVao.isCreated())
+    {
+        _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+        _uQuadsVao.bind();
+        glDrawArrays(GL_QUADS, 0, _uLines.size() * 2);
+        _uQuadsVao.release();
+    }
+
+    if(_oQuadsVao.isCreated())
+    {
+        _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+        _oQuadsVao.bind();
+        glDrawArrays(GL_QUADS, 0, _oLines.size() * 2);
+        _oQuadsVao.release();
+    }
 
     if(_tempLines.size() != 0)
     {
@@ -803,4 +824,40 @@ void PatternGenerator::PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer*
     _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
 
     linesVao->release();
+}
+
+void PatternGenerator::PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
+{
+    if(vao->isCreated()) { vao->destroy(); }
+
+    vao->create();
+    vao->bind();
+
+    QVector<VertexData> data;
+    for(uint a = 0; a < lines.size() - 1; a += 2)
+    {
+        data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol));
+        data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol));
+
+        data.append(VertexData(QVector3D(lines[a+1].XB, lines[a+1].YB,  0), QVector2D(), vecCol));
+        data.append(VertexData(QVector3D(lines[a+1].XA, lines[a+1].YA,  0), QVector2D(), vecCol));
+
+    }
+
+    vbo->create();
+    vbo->bind();
+    vbo->allocate(data.data(), data.size() * sizeof(VertexData));
+
+    quintptr offset = 0;
+
+    _shaderProgram->enableAttributeArray(_vertexLocation);
+    _shaderProgram->setAttributeBuffer(_vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
+
+    offset += sizeof(QVector3D);
+    offset += sizeof(QVector2D);
+
+    _shaderProgram->enableAttributeArray(_colorLocation);
+    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    vao->release();
 }

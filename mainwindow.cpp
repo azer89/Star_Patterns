@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->angleSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
     connect(ui->wSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
     connect(ui->hSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
+    connect(ui->rWidthSpinBox, SIGNAL(valueChanged(double)),    this, SLOT(ParamsChanged()));
     connect(ui->tilingCheckBox,	 SIGNAL(stateChanged(int)), this, SLOT(ParamsChanged()));
 
     //float radAngle = 32.0f * M_PI / 180.0;
@@ -29,6 +30,7 @@ void MainWindow::ParamsChanged()
     float degAngle = ui->angleSpinBox->value();
     float radAngle = degAngle * M_PI / 180.0;
     SystemParams::rad_angle = radAngle;
+    SystemParams::ribbon_width = ui->rWidthSpinBox->value();
     SystemParams::w = ui->wSpinBox->value();
     SystemParams::h = ui->hSpinBox->value();
     SystemParams::show_tiling = ui->tilingCheckBox->isChecked();
@@ -42,7 +44,6 @@ void MainWindow::ParamsChanged()
     else
     {
         tilingName = SystemParams::default_tiling;
-        //tilingName = "test";
     }
 
     ui->widget->GetGLWidget()->GeneratePattern(tilingName);

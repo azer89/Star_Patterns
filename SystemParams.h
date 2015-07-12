@@ -2,6 +2,7 @@
 #define SYSTEMPARAMS_H
 
 #include <iostream>
+#include <QVector3D>
 
 class SystemParams
 {
@@ -19,6 +20,9 @@ public:
 
     static int w;
     static int h;
+
+    static QVector3D ribbon_color;
+    static QVector3D line_color;
 };
 
 #endif // SYSTEMPARAMS_H
