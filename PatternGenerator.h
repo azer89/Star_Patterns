@@ -30,12 +30,18 @@ private:
     void                    InferenceAlgorithm(std::vector<std::vector<ALine>> shapes);
     AVector                 MultiplyVector(QMatrix3x3 mat, AVector vec);
     void                    MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
+    float                   AngleInBetween(AVector vec1, AVector vec2);
     void                    ReadXML(std::string filename);
     TilingData              GetTiling(std::string tilingName);
+
+    float GetRotation(AVector pt1, AVector pt2);
+
     //bool                    IsCollinear(AVector pt1, AVector pt2, AVector pt3);
     bool CheckCollinearCase(ALine ray1, ALine ray2);
     bool CheckHorizontalVerticalCase(ALine ray1, ALine ray2);
+    void CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &tempLines);
 
+    void PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2);
     void PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
     void PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao);
 
@@ -56,6 +62,22 @@ private:
     std::vector<ALine>              _rayLines;
     QOpenGLBuffer                   _rayLinesVbo;
     QOpenGLVertexArrayObject        _rayLinesVao;
+
+    std::vector<ALine>              _tempLines;
+    QOpenGLBuffer                   _tempLinesVbo;
+    QOpenGLVertexArrayObject        _tempLinesVao;
+
+    /*
+    // odd
+    std::vector<ALine>              _oLines;
+    QOpenGLBuffer                   _oLinesVbo;
+    QOpenGLVertexArrayObject        _oLinesVao;
+
+    // even
+    std::vector<ALine>              _eLines;
+    QOpenGLBuffer                   _eLinesVbo;
+    QOpenGLVertexArrayObject        _eLinesVao;
+    */
 
     std::vector<ALine>              _tilingLines;
     QOpenGLBuffer                   _tilingLinesVbo;

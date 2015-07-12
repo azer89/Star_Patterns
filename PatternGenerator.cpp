@@ -140,6 +140,7 @@ TilingData PatternGenerator::GetTiling(std::string tilingName)
 void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes)
 {
     _rayLines.clear();
+    _tempLines.clear();
 
     float eps_val = std::numeric_limits<float>::epsilon() * 1000.0f;
 
@@ -157,8 +158,9 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
         int sides = aShape.size();
         std::vector<ALine> sRays;
 
-        //std::vector<ALine> lRays;
         //std::vector<ALine> rRays;
+        //std::vector<ALine> lRays;
+
 
         for(int b = 0; b < aShape.size(); b++)
         {
@@ -172,26 +174,25 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             dirVecRotated1.x = cos1 * dirVec.x - sin1 * dirVec.y;
             dirVecRotated1.y = sin1 * dirVec.x + cos1 * dirVec.y;
             sRays.push_back(ALine(midPoint, dirVecRotated1.Norm(), true, b));
-            //_rayLines.push_back(ALine(midPoint, midPoint + dirVecRotated1.Norm() * 0.5, true, b));
-            //rRays.push_back(ALine(midPoint, midPoint + dirVecRotated1.Norm() * 0.05, true, b));
+            //rRays.push_back(ALine(midPoint, midPoint + dirVecRotated1.Norm() * 0.5, true, b));
 
             // a left ray
             AVector dirVecRotated2;
             dirVecRotated2.x = cos2 * dirVec.x - sin2 * dirVec.y;
             dirVecRotated2.y = sin2 * dirVec.x + cos2 * dirVec.y;
             sRays.push_back(ALine(midPoint, dirVecRotated2.Norm(), false, b));
-            //_rayLines.push_back(ALine(midPoint, midPoint + dirVecRotated2.Norm()  * 0.5, false, b));
-            //lRays.push_back(ALine(midPoint, midPoint + dirVecRotated2.Norm()  * 0.05, false, b));
+            //lRays.push_back(ALine(midPoint, midPoint + dirVecRotated2.Norm()  * 0.5, false, b));
         }
 
         /*
-        ALine aLine1 = rRays[3];
-        ALine aLine2 = lRays[4];
+        ALine aLine1 = rRays[0];
+        ALine aLine2 = lRays[1];
         AVector dir1 = ( aLine1.GetPointB() - aLine1.GetPointA() ).Norm();
         AVector dir2 = ( aLine2.GetPointB() - aLine2.GetPointA() ).Norm();
         //std::cout << dir1.x  << "   " << dir1.y << "   " << dir2.x  << "   " << dir2.y << "\n";
-        _rayLines.push_back(rRays[3]);
-        _rayLines.push_back(lRays[4]);
+        _rayLines.push_back(aLine1);
+        _rayLines.push_back(aLine2);
+        std::cout << "dude\n";
         CheckCollinearCase(ALine(aLine1.GetPointA(), dir1), ALine(aLine2.GetPointA(), dir2));
         */
 
@@ -201,18 +202,27 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
         {
             for(int b = a + 1; b < sRays.size(); b++)
             {
-                //if(sRays[a]._isRight != sRays[b]._isRight)
-                //{
-                std::pair<ALine, ALine> aPair(sRays[a], sRays[b]);
-                rayCombination.push_back(aPair);
-                    //_rayLines.push_back(sRays[a]);
-                    //_rayLines.push_back(sRays[b]);
-                //}
+                ALine line1 = sRays[a];
+                ALine line2 = sRays[b];
+
+                if(line1._isRight)
+                {
+                    std::pair<ALine, ALine> aPair(line1, line2);
+                    rayCombination.push_back(aPair);
+                }
+                else
+                {
+                    std::pair<ALine, ALine> aPair(line2, line1);
+                    rayCombination.push_back(aPair);
+                }
+
+                //std::pair<ALine, ALine> aPair(sRays[a], sRays[b]);
+                //rayCombination.push_back(aPair);
             }
         }
 
         // calculate candidates
-        std::vector<std::pair<ALine, ALine>> lineCombination;
+        std::vector<std::pair<ALine, ALine>> lineCombination1;
         for(int a = 0; a < rayCombination.size(); a++)
         {
             ALine rayA = rayCombination[a].first;
@@ -241,80 +251,209 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
                 //_rayLines.push_back(aLine1);
                 //_rayLines.push_back(aLine2);
 
-                lineCombination.push_back(std::pair<ALine, ALine>(aLine1, aLine2));
+                lineCombination1.push_back(std::pair<ALine, ALine>(aLine1, aLine2));
+            }
+            else if(CheckCollinearCase(rayA, rayB) || CheckHorizontalVerticalCase(rayA, rayB))
+            {
+                AVector midPoint = rayA.GetPointA() + (rayB.GetPointA() - rayA.GetPointA()) * 0.5f;
 
-                //std::cout << det << " " << aLine1.Magnitude() << "\n";
-                //std::cout << det << " " << aLine2.Magnitude() << "\n";
+                ALine aLine1(rayA.GetPointA(), midPoint);
+                aLine1._isRight = rayA._isRight;
+                aLine1._side = rayA._side;
+
+                ALine aLine2(rayB.GetPointA(), midPoint);
+                aLine2._isRight = rayB._isRight;
+                aLine2._side = rayB._side;
+
+                lineCombination1.push_back(std::pair<ALine, ALine>(aLine1, aLine2));
+
+                //lineCombination1.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
             }
-            else if(CheckCollinearCase(rayA, rayB))
-            {
-                AVector midPoint = rayA.GetPointA() + (rayB.GetPointA() - rayA.GetPointA()) * 0.5f;
-                lineCombination.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
-            }
-            else if(CheckHorizontalVerticalCase(rayA, rayB))
-            {
-                AVector midPoint = rayA.GetPointA() + (rayB.GetPointA() - rayA.GetPointA()) * 0.5f;
-                lineCombination.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
-            }
+            //else if(CheckHorizontalVerticalCase(rayA, rayB))
+            //{
+            //    AVector midPoint = rayA.GetPointA() + (rayB.GetPointA() - rayA.GetPointA()) * 0.5f;
+            //    lineCombination1.push_back(std::pair<ALine, ALine>(ALine(rayA.GetPointA(), midPoint), ALine(rayB.GetPointA(), midPoint)));
+            //}
         }
 
-
-        // select candidate
-        //std::sort (lineCombination.begin(), lineCombination.end(), LessThanLineMagnitudePair());
-
-        /*for(int a = 0; a < lineCombination.size(); a++)
+        std::sort (lineCombination1.begin(), lineCombination1.end(), LessThanLineMagnitudePair());
+        //ALine aLine1 = lineCombination1[3].first;
+        //ALine aLine2 = lineCombination1[3].second;
+        //_rayLines.push_back(aLine1);
+        //_rayLines.push_back(aLine2);
+        /*for(int a = 0; a < 4; a++)
         {
-            ALine aLine1 = lineCombination[17].first;
-            ALine aLine2 = lineCombination[17].second;
-            AVector dir1 = (aLine1.GetPointB() - aLine1.GetPointA());
-            AVector dir2 = (aLine2.GetPointB() - aLine2.GetPointA());
-            std::cout << aLine1.Magnitude() << "\n";
-            std::cout << aLine2.Magnitude() << "\n";
-            //std::cout << dir1.x  << " " << dir1.y << "\n";
-            //std::cout << dir2.x  << " " << dir2.y << "\n";
-
-            //CheckSpecialCase(ALine(aLine1.GetPointA(), dir1.Inverse()), ALine(aLine2.GetPointA(), dir2.Inverse()));
-            //std::cout << "\n";
+            ALine aLine1 = lineCombination1[a].first;
+            ALine aLine2 = lineCombination1[a].second;
             _rayLines.push_back(aLine1);
             _rayLines.push_back(aLine2);
+
+            std::cout << aLine1._isRight << " " << aLine1._side << "\n";
+            std::cout << aLine2._isRight << " " << aLine2._side << "\n";
+            std::cout << "\n";
         }*/
 
-
         int counter = 0;
-        std::sort (lineCombination.begin(), lineCombination.end(), LessThanLineMagnitudePair());
+        std::vector<std::pair<ALine, ALine>> lineCombination2;
         while(counter < sides)
         {
+            //std::sort (lineCombination1.begin(), lineCombination1.end(), LessThanLineMagnitudePair());
+
             //std::cout << sides << " " << counter << " " << "\n";
-            ALine aLine1 = lineCombination[0].first;
-            ALine aLine2 = lineCombination[0].second;
-            _rayLines.push_back(aLine1);
-            _rayLines.push_back(aLine2);
+            ALine aLine1 = lineCombination1[0].first;
+            ALine aLine2 = lineCombination1[0].second;
+
+            lineCombination2.push_back(lineCombination1[0]);
+
+            //_rayLines.push_back(aLine1);
+            //_rayLines.push_back(aLine2);
 
             //lineCombination.erase (lineCombination.begin());
 
-            // remove first
-            for(int i = lineCombination.size() - 1; i >= 0; i--)
+            for(int i = lineCombination1.size() - 1; i >= 0; i--)
             {
-                std::pair<ALine, ALine> linePair = lineCombination[i];
+                std::pair<ALine, ALine> linePair = lineCombination1[i];
                 if(( linePair.first._isRight  ==  aLine1._isRight && linePair.first._side  == aLine1._side)    ||
                    ( linePair.second._isRight ==  aLine1._isRight && linePair.second._side == aLine1._side )   ||
+
                    ( linePair.first._isRight  ==  aLine2._isRight && linePair.first._side  == aLine2._side)    ||
                    ( linePair.second._isRight ==  aLine2._isRight && linePair.second._side == aLine2._side ))
                 {
-                    lineCombination.erase (lineCombination.begin() + i);
+                    lineCombination1.erase (lineCombination1.begin() + i);
                 }
             }
 
             counter++;
         }
+
+
+        for(int a = 0; a < lineCombination2.size(); a++)
+        {
+            ALine aLine1 = lineCombination2[a].first;
+            ALine aLine2 = lineCombination2[a].second;
+            _rayLines.push_back(aLine1);
+            _rayLines.push_back(aLine2);
+
+            CalculateInterlace(lineCombination2[a], aShape, _tempLines);
+        }
     }
 
-    PrepareLinesVAO1(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0, 0, 0));
-    //PrepareLinesVAO2(_rayLines, &_rayLinesVbo, &_rayLinesVao);
+    //PrepareLinesVAO1(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0, 0, 0));
+    //PrepareLinesVAO0(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(1, 0, 0), QVector3D(0, 0, 1));
+    //PrepareLinesVAO2(_tempLines, &_tempLinesVbo, &_tempLinesVao);
+    PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 0, 0));
+}
+
+void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &tempLines)
+{
+    ALine aLine1 = segment.first;
+    ALine aLine2 = segment.second;
+    ALine ray1(aLine1.GetPointA(), aLine1.Direction().Norm());
+    ALine ray2(aLine2.GetPointA(), aLine2.Direction().Norm());
+    AVector dir1 = aLine1.Direction().Norm();
+    AVector dir2 = aLine2.Direction().Norm();
+
+    float halfWidth = SystemParams::ribbon_width * 0.5f;
+    float eps_val = std::numeric_limits<float>::epsilon() * 1000;
+
+    AVector cPt;
+    AVector dPt;
+
+    // parallel test
+    float par_val = abs( dir1.Dot(dir2) / (dir1.Length() * dir2.Length()) );
+    if(par_val > 1.0f - eps_val)
+    {
+        dir1 = AVector(-dir1.y, dir1.x);
+        dir2 = AVector(-dir2.y, dir2.x);
+
+        AVector midDir = dir1;
+        float hypotenuse1 = halfWidth;
+
+        midDir *= hypotenuse1;
+
+        AVector midPt = aLine1.GetPointB();
+        cPt = midPt - midDir;
+        dPt = midPt + midDir;
+
+        //tempLines.push_back(ALine(cPt, dPt));
+    }
+    else
+    {
+        AVector dir1 = aLine1.Direction().Norm();
+        AVector dir2 = aLine2.Direction().Norm();
+        AVector midDir = (dir1 + dir2) / 2.0f;
+
+        float angle1 = AngleInBetween(dir1, dir2) / 2.0f; // half angle because intersection
+        float angle2 = M_PI / 2.0f - angle1;  // another angle
+        float hypotenuse1 = halfWidth / cos(angle2);
+
+        midDir = midDir.Norm();
+        midDir *= hypotenuse1;
+
+        AVector midPt = aLine1.GetPointB();
+
+        float dir_angle = GetRotation(dir1, dir2);
+        if(dir_angle < 0)
+        {
+            cPt = midPt + midDir;
+            dPt = midPt - midDir;
+        }
+        else
+        {
+            cPt = midPt - midDir;
+            dPt = midPt + midDir;
+        }
+
+        //tempLines.push_back(ALine(cPt, dPt));
+    }
+
+    // start
+    float angleA = SystemParams::rad_angle;
+    float angleB = M_PI / 2.0f - angleA;
+    float hypotenuse2 = halfWidth / cos(angleB);
+    AVector dirHA = aShape[aLine1._side].Direction().Norm();
+    AVector dirVA = AVector(dirHA.y, -dirHA.x);
+    AVector aPt = aLine1.GetPointA() + dirVA * hypotenuse2;
+    AVector bPt = aLine1.GetPointA() + dirHA * hypotenuse2;
+    //tempLines.push_back(ALine(aLine1.GetPointA() + dirVA * hypotenuse2, aLine1.GetPointA())); // a
+    //tempLines.push_back(ALine(aLine1.GetPointA() + dirHA * hypotenuse2, aLine1.GetPointA())); // b
+
+    // end
+    float angleX = M_PI - SystemParams::rad_angle;
+    float angleY = M_PI / 2.0f - angleX;
+    float hypotenuse3 = halfWidth / cos(angleY);
+    AVector dirX = aShape[aLine2._side].Direction().Norm();
+    AVector dirVB = AVector(dirX.y, -dirX.x);
+    AVector dirHB = AVector(-dirX.x, -dirX.y);
+    AVector ePt = aLine2.GetPointA() + dirVB * hypotenuse3;
+    AVector fPt = aLine2.GetPointA() + dirHB * hypotenuse3;
+    //tempLines.push_back(ALine(aLine2.GetPointA() + dirVB * hypotenuse3, aLine2.GetPointA())); // e
+    //tempLines.push_back(ALine(aLine2.GetPointA() + dirHB * hypotenuse3, aLine2.GetPointA())); // f
+
+    tempLines.push_back(ALine(aPt, cPt));
+    tempLines.push_back(ALine(bPt, dPt));
+
+    tempLines.push_back(ALine(cPt, ePt));
+    tempLines.push_back(ALine(dPt, fPt));
+}
+
+// signed
+float PatternGenerator::GetRotation(AVector pt1, AVector pt2)
+{
+    float perpDot = pt1.x * pt2.y - pt1.y * pt2.x;
+    return (float)atan2(perpDot, pt1.Dot(pt2));
+}
+
+// unsigned
+float PatternGenerator::AngleInBetween(AVector vec1, AVector vec2)
+{
+    //std::cout << vec1.Dot(vec2) << " " << vec1.Length() << " " << vec2.Length() << "\n";
+    return acos(vec1.Dot(vec2) / (vec1.Length() * vec2.Length()));
 }
 
 bool PatternGenerator::CheckHorizontalVerticalCase(ALine ray1, ALine ray2)
 {
+    float eps_val = std::numeric_limits<float>::epsilon() * 1000;
     AVector midPoint = ray1.GetPointA() + (ray2.GetPointA() - ray1.GetPointA()) * 0.5f;
 
     float u1 = (midPoint.x - ray1.GetPointA().x) / ray1.GetPointB().x;
@@ -323,7 +462,7 @@ bool PatternGenerator::CheckHorizontalVerticalCase(ALine ray1, ALine ray2)
     float v2 = (midPoint.y - ray2.GetPointA().y) / ray2.GetPointB().y;
 
     // vertical case
-    if(ray1.GetPointB().x == 0 && ray2.GetPointB().x == 0 &&
+    if(abs(ray1.GetPointB().x) < eps_val && abs(ray2.GetPointB().x) <  eps_val &&
        ray1.GetPointB().y != 0 && ray2.GetPointB().y != 0 &&
        u2 > 0 && v2 > 0 )
     {
@@ -331,7 +470,7 @@ bool PatternGenerator::CheckHorizontalVerticalCase(ALine ray1, ALine ray2)
     }
     // horizontal case
     else if(ray1.GetPointB().x != 0 && ray2.GetPointB().x != 0 &&
-            ray1.GetPointB().y == 0 && ray2.GetPointB().y == 0 &&
+            abs(ray1.GetPointB().y) < eps_val && abs(ray2.GetPointB().y) < eps_val &&
             u1 > 0 && v1 > 0)
     {
         return true;
@@ -339,8 +478,11 @@ bool PatternGenerator::CheckHorizontalVerticalCase(ALine ray1, ALine ray2)
     return false;
 }
 
+// to do: this function might be wrong
 bool PatternGenerator::CheckCollinearCase(ALine ray1, ALine ray2)
 {
+    //std::cout << "CheckCollinearCase\n";
+
     float eps_val = std::numeric_limits<float>::epsilon() * 1000;
 
     AVector midPoint = ray1.GetPointA() + (ray2.GetPointA() - ray1.GetPointA()) * 0.5f;
@@ -349,37 +491,6 @@ bool PatternGenerator::CheckCollinearCase(ALine ray1, ALine ray2)
     float u2 = (midPoint.y - ray1.GetPointA().y) / ray1.GetPointB().y;
     float v1 = (midPoint.x - ray2.GetPointA().x) / ray2.GetPointB().x;
     float v2 = (midPoint.y - ray2.GetPointA().y) / ray2.GetPointB().y;
-
-    //if(isinf(u1)) u1 = 0;
-    //if(isinf(v1)) v1 = 0;
-    //if(isinf(u2)) u2 = 0;
-    //if(isinf(v2)) v2 = 0;
-
-    /*
-    std::cout << midPoint.x << "   "
-              << midPoint.y << "   "
-              << midPoint.x << "   "
-              << midPoint.y << "\n";
-
-    std::cout << ray1.GetPointA().x << "   "
-              << ray1.GetPointA().y << "   "
-              << ray2.GetPointA().x << "   "
-              << ray2.GetPointA().y << "\n";
-
-    std::cout << (midPoint.x - ray1.GetPointA().x) << "   "
-              << (midPoint.y - ray1.GetPointA().y) << "   "
-              << (midPoint.x - ray2.GetPointA().x) << "   "
-              << (midPoint.y - ray2.GetPointA().y) << "\n";
-
-    std::cout << ray1.GetPointB().x << "   "
-              << ray1.GetPointB().y << "   "
-              << ray2.GetPointB().x << "   "
-              << ray2.GetPointB().y << "\n";
-    */
-
-    //if(isinf(u1) || isnan(u1)) u1 = 0;
-
-    //std::cout << u1 << "   " << u2 << "   " << v1 << "   " << v2 << "\n";
 
     if(abs(u1 - u2) < eps_val && abs(v1 - v2) < eps_val && u1 > 0 && u2 > 0 && v1 > 0 && v2 > 0)
     {
@@ -486,6 +597,14 @@ void PatternGenerator::Paint()
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
 
+    if(_tempLines.size() != 0)
+    {
+        glLineWidth(1.0f);
+        _tempLinesVao.bind();
+        glDrawArrays(GL_LINES, 0, _tempLines.size() * 2);
+        _tempLinesVao.release();
+    }
+
     if(_tilingLines.size() != 0 && SystemParams::show_tiling)
     {
         glLineWidth(1.0f);
@@ -501,6 +620,8 @@ void PatternGenerator::Paint()
         glDrawArrays(GL_LINES, 0, _rayLines.size() * 2);
         _rayLinesVao.release();
     }
+
+
 }
 
 void PatternGenerator::ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines)
@@ -570,16 +691,65 @@ void PatternGenerator::PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer*
     linesVao->bind();
 
     QVector<VertexData> data;
+    //QVector3D vecCol;
+
+    QVector3D vecCol1(1, 1, 0);
+    QVector3D vecCol2(0, 0, 1);
+
+    for(uint a = 0; a < lines.size(); a++)
+    {
+        if(a % 2 == 0)
+        {
+            //float r = (float)(rand() % 255) / 255.0;
+            //float g = (float)(rand() % 255) / 255.0;
+            //float b = (float)(rand() % 255) / 255.0;
+            //vecCol = QVector3D(r, g, b);
+        }
+        //data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol));
+        //data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol));
+
+        data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol1));
+        data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol2));
+    }
+
+    linesVbo->create();
+    linesVbo->bind();
+    linesVbo->allocate(data.data(), data.size() * sizeof(VertexData));
+
+    quintptr offset = 0;
+
+    _shaderProgram->enableAttributeArray(_vertexLocation);
+    _shaderProgram->setAttributeBuffer(_vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
+
+    offset += sizeof(QVector3D);
+    offset += sizeof(QVector2D);
+
+    _shaderProgram->enableAttributeArray(_colorLocation);
+    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    linesVao->release();
+}
+
+void PatternGenerator::PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2)
+{
+    if(linesVao->isCreated()) { linesVao->destroy(); }
+
+    linesVao->create();
+    linesVao->bind();
+
+    QVector<VertexData> data;
     QVector3D vecCol;
     for(uint a = 0; a < lines.size(); a++)
     {
         if(a % 2 == 0)
         {
-            float r = (float)(rand() % 255) / 255.0;
-            float g = (float)(rand() % 255) / 255.0;
-            float b = (float)(rand() % 255) / 255.0;
-            vecCol = QVector3D(r, g, b);
+            vecCol = vecCol1;
         }
+        else
+        {
+            vecCol = vecCol2;
+        }
+
         data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol));
         data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol));
     }

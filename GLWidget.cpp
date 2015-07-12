@@ -11,6 +11,7 @@
 #include <QSvgGenerator>
 
 #include "VertexData.h"
+#include "SystemParams.h"
 
 GLWidget::GLWidget(QGLFormat format, QWidget *parent) :
     QGLWidget(format, parent),
@@ -66,7 +67,8 @@ void GLWidget::initializeGL()
     _patternGenerator->_img_width = _img_width;
     _patternGenerator->_img_height = _img_height;
     _patternGenerator->InitTiling();
-    _patternGenerator->GeneratePattern("3.4.12 RD");
+    _patternGenerator->GeneratePattern(SystemParams::default_tiling);
+    //_patternGenerator->GeneratePattern("test");
 }
 
 void GLWidget::GeneratePattern(std::string tilingName)
