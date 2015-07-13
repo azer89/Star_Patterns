@@ -1,6 +1,7 @@
 #ifndef AVECTOR_H
 #define AVECTOR_H
 
+#include <iostream>
 #include <limits>
 #include <cmath>
 

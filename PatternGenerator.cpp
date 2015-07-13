@@ -9,6 +9,7 @@
 #include "VertexData.h"
 #include "PatternGenerator.h"
 #include "SystemParams.h"
+#include "Triangulator.h"
 
 
 PatternGenerator::PatternGenerator()
@@ -140,6 +141,8 @@ TilingData PatternGenerator::GetTiling(std::string tilingName)
 void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes)
 {
     _rayLines.clear();
+    _tempPoints.clear();
+    _triangleLines.clear();
     _tempLines.clear();
     _uLines.clear();
     _oLines.clear();
@@ -285,19 +288,19 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
 
             CalculateInterlace(lineCombination2[a], aShape, _uLines, _oLines);
         }
+
+        std::vector<ALine> triangles = Triangulator::GetTriangles(lineCombination2, aShape[0].GetPointA());
+        _triangleLines.insert( _triangleLines.end(), triangles.begin(), triangles.end() );
+
     }
 
-    //PrepareLinesVAO1(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(0, 0, 0));
-    //PrepareLinesVAO0(_rayLines, &_rayLinesVbo, &_rayLinesVao, QVector3D(1, 0, 0), QVector3D(0, 0, 1));
-    //PrepareLinesVAO2(_tempLines, &_tempLinesVbo, &_tempLinesVao);
-
-    //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 0, 0));
-
+    //PreparePointsVAO(_tempPoints, &_tempPointsVbo, &_tempPointsVao, QVector3D(1, 0, 0));
+    //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 1, 0));
+    PrepareTrianglesVAO(_triangleLines, &_trianglesVbo, &_trianglesVao, SystemParams::star_color);
     PrepareQuadsVAO(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
     PrepareQuadsVAO(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
-
-    PrepareLinesVAO1(_uLines, &_uLinesVbo, &_uLinesVao, SystemParams::line_color);
-    PrepareLinesVAO1(_oLines, &_oLinesVbo, &_oLinesVao, SystemParams::line_color);
+    PrepareLinesVAO1(_uLines, &_uLinesVbo, &_uLinesVao, SystemParams::interlacing_color);
+    PrepareLinesVAO1(_oLines, &_oLinesVbo, &_oLinesVao, SystemParams::interlacing_color);
 }
 
 void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines)
@@ -520,15 +523,23 @@ void PatternGenerator::InitTiling()
 
 }
 
-void PatternGenerator::Paint()
+void PatternGenerator::Paint(float zoomFactor)
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
+
+    if(_tempPointsVao.isCreated())
+    {
+        glPointSize(10.0f);
+        _tempPointsVao.bind();
+        glDrawArrays(GL_POINTS, 0, _tempPoints.size());
+        _tempPointsVao.release();
+    }
 
     if(_uLinesVao.isCreated())
     {
         _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
         _uLinesVao.bind();
-        glLineWidth(2.0f);
+        glLineWidth(0.006f * zoomFactor);
         glDrawArrays(GL_LINES, 0, _uLines.size() * 2);
         _uLinesVao.release();
     }
@@ -545,7 +556,7 @@ void PatternGenerator::Paint()
     {
         _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
         _oLinesVao.bind();
-        glLineWidth(2.0f);
+        glLineWidth(0.006f * zoomFactor);
         glDrawArrays(GL_LINES, 0, _oLines.size() * 2);
         _oLinesVao.release();
     }
@@ -558,13 +569,7 @@ void PatternGenerator::Paint()
         _oQuadsVao.release();
     }
 
-    if(_tempLines.size() != 0)
-    {
-        glLineWidth(1.0f);
-        _tempLinesVao.bind();
-        glDrawArrays(GL_LINES, 0, _tempLines.size() * 2);
-        _tempLinesVao.release();
-    }
+
 
     if(_tilingLines.size() != 0 && SystemParams::show_tiling)
     {
@@ -582,6 +587,12 @@ void PatternGenerator::Paint()
         _rayLinesVao.release();
     }
 
+    if(_trianglesVao.isCreated())
+    {
+        _trianglesVao.bind();
+        glDrawArrays(GL_TRIANGLES, 0, _triangleLines.size());
+        _trianglesVao.release();
+    }
 
 }
 
@@ -800,4 +811,129 @@ void PatternGenerator::PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* 
     _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
 
     vao->release();
+}
+
+void PatternGenerator::PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol)
+{
+    if(ptsVao->isCreated())
+    {
+        ptsVao->destroy();
+    }
+
+    ptsVao->create();
+    ptsVao->bind();
+
+    QVector<VertexData> data;
+    for(size_t a = 0; a < points.size(); a++)
+    {
+        data.append(VertexData(QVector3D(points[a].x, points[a].y,  0), QVector2D(), vecCol));
+    }
+
+    ptsVbo->create();
+    ptsVbo->bind();
+    ptsVbo->allocate(data.data(), data.size() * sizeof(VertexData));
+
+    quintptr offset = 0;
+
+    int vertexLocation = _shaderProgram->attributeLocation("vert");
+    _shaderProgram->enableAttributeArray(vertexLocation);
+    _shaderProgram->setAttributeBuffer(vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
+
+    offset += sizeof(QVector3D);
+    offset += sizeof(QVector2D);
+
+    _shaderProgram->enableAttributeArray(_colorLocation);
+    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    ptsVao->release();
+}
+
+void PatternGenerator::PrepareTrianglesVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
+{
+    if(vao->isCreated()) { vao->destroy(); }
+
+    vao->create();
+    vao->bind();
+
+    QVector<VertexData> data;
+    for(uint a = 0; a < lines.size(); a += 3)
+    {
+        ALine line1 = lines[a];
+        ALine line2 = lines[a + 1];
+        ALine line3 = lines[a + 2];
+
+        /*
+            triangles.push_back(ALine(v1, v2));
+            triangles.push_back(ALine(v2, v3));
+            triangles.push_back(ALine(v3, v1));
+        */
+
+        data.append(VertexData(QVector3D(line1.XA, line1.YA,  0), QVector2D(), vecCol));
+        data.append(VertexData(QVector3D(line1.XB, line1.YB,  0), QVector2D(), vecCol));
+        data.append(VertexData(QVector3D(line3.XA, line3.YA,  0), QVector2D(), vecCol));
+
+        //data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol));
+        //data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol));
+        //data.append(VertexData(QVector3D(lines[a+1].XB, lines[a+1].YB,  0), QVector2D(), vecCol));
+        //data.append(VertexData(QVector3D(lines[a+1].XA, lines[a+1].YA,  0), QVector2D(), vecCol));
+
+    }
+
+    vbo->create();
+    vbo->bind();
+    vbo->allocate(data.data(), data.size() * sizeof(VertexData));
+
+    quintptr offset = 0;
+
+    _shaderProgram->enableAttributeArray(_vertexLocation);
+    _shaderProgram->setAttributeBuffer(_vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
+
+    offset += sizeof(QVector3D);
+    offset += sizeof(QVector2D);
+
+    _shaderProgram->enableAttributeArray(_colorLocation);
+    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
+
+    vao->release();
+}
+
+AVector PatternGenerator::GetPolygonCentroid(std::vector<ALine> shapes)
+{
+    AVector centroid(0, 0);
+    float signedArea = 0.0f;
+    //double x0 = 0.0; // Current vertex X
+    //double y0 = 0.0; // Current vertex Y
+    //double x1 = 0.0; // Next vertex X
+    //double y1 = 0.0; // Next vertex Y
+    //double a = 0.0;  // Partial signed area
+
+    // For all vertices except last
+    //int i=0;
+    for (int i = 0; i < shapes.size(); i++)
+    {
+        float x0 = shapes[i].GetPointA().x;
+        float y0 = shapes[i].GetPointA().y;
+        float x1 = shapes[i].GetPointB().x;
+        float y1 = shapes[i].GetPointB().y;
+        float a = x0 * y1 - x1 * y0;
+        signedArea += a;
+        centroid.x += (x0 + x1) * a;
+        centroid.y += (y0 + y1) * a;
+    }
+
+    // Do last vertex
+    //x0 = vertices[i].x;
+    //y0 = vertices[i].y;
+    //x1 = vertices[0].x;
+    //y1 = vertices[0].y;
+    //a = x0*y1 - x1*y0;
+    //signedArea += a;
+    //centroid.x += (x0 + x1)*a;
+    //centroid.y += (y0 + y1)*a;
+
+    signedArea *= 0.5;
+    centroid.x /= (6.0f * signedArea);
+    centroid.y /= (6.0f * signedArea);
+
+    return centroid;
 }

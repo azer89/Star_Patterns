@@ -22,6 +22,7 @@ private:
 private slots:
     void ItemClicked(QTreeWidgetItem * item, int column);
     void ParamsChanged();
+    void SaveSVG();
 };
 
 #endif // MAINWINDOW_H

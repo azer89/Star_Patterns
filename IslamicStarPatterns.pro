@@ -18,7 +18,8 @@ SOURCES += main.cpp\
     GLWidget.cpp \
     tinyxml2.cpp \
     PatternGenerator.cpp \
-    SystemParams.cpp
+    SystemParams.cpp \
+    Triangulator.cpp
 
 HEADERS  += mainwindow.h \
     ALine.h \
@@ -31,9 +32,16 @@ HEADERS  += mainwindow.h \
     TilingData.h \
     ARay.h \
     SystemParams.h \
-    RibbonSegment.h
+    RibbonSegment.h \
+    Triangulator.h
 
 FORMS    += mainwindow.ui
+
+INCLUDEPATH +=   /usr/include/
+LIBS        += -L/usr/include/
+LIBS        += -lCGAL
+LIBS        += -lgmp
+LIBS        += -lmpfr
 
 QMAKE_CXXFLAGS += -frounding-math -O3
 

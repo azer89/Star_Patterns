@@ -55,7 +55,7 @@ private:
     void PaintCurve();
     void CreateCurveVAO();
 
-    void SaveToSvg();
+
 
     //void InitTiling();
     //std::vector<AVector> GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
@@ -84,6 +84,8 @@ public:
     ~GLWidget();
 
     QSize GetCanvasSize() { return QSize(_img_width, _img_height); }
+
+    void SaveToSvg();
 
     // zoom in handle
     void ZoomIn();

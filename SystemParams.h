@@ -21,8 +21,11 @@ public:
     static int w;
     static int h;
 
+    static QVector3D star_color;
     static QVector3D ribbon_color;
-    static QVector3D line_color;
+    static QVector3D background_color;
+    static QVector3D interlacing_color;
+
 };
 
 #endif // SYSTEMPARAMS_H

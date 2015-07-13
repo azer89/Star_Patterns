@@ -111,7 +111,7 @@ void GLWidget::paintGL()
 
     _shaderProgram->setUniformValue(_mvpMatrixLocation, orthoMatrix * transformMatrix);
 
-    _patternGenerator->Paint();
+    _patternGenerator->Paint(_zoomFactor);
     //PaintCurve();
 }
 
@@ -283,6 +283,164 @@ void GLWidget::PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo
 
 void GLWidget::SaveToSvg()
 {
+    //std::cout << "save SVG\n";
+    std::vector<ALine> tilingLines = _patternGenerator->GetTilingLines();
+    std::vector<ALine> uLines = _patternGenerator->GetULines();
+    std::vector<ALine> oLines = _patternGenerator->GetOLines();
+    std::vector<ALine> triangleLines = _patternGenerator->GetTriangleLines();
+
+    int maxW = 100;
+    int maxH = 100;
+    float scaleFactor = 10.0f;
+    float offset = 250.0f;
+
+    // rescale
+    for(int a = 0; a < tilingLines.size(); a++)
+    {
+        tilingLines[a].XA = tilingLines[a].XA * scaleFactor - offset;
+        tilingLines[a].YA = tilingLines[a].YA * scaleFactor - offset;
+        tilingLines[a].XB = tilingLines[a].XB * scaleFactor - offset;
+        tilingLines[a].YB = tilingLines[a].YB * scaleFactor - offset;
+    }
+    for(int a = 0; a < triangleLines.size(); a++)
+    {
+        triangleLines[a].XA = triangleLines[a].XA * scaleFactor - offset;
+        triangleLines[a].YA = triangleLines[a].YA * scaleFactor - offset;
+        triangleLines[a].XB = triangleLines[a].XB * scaleFactor - offset;
+        triangleLines[a].YB = triangleLines[a].YB * scaleFactor - offset;
+    }
+    for(int a = 0; a < uLines.size(); a++)
+    {
+        uLines[a].XA = uLines[a].XA * scaleFactor - offset;
+        uLines[a].YA = uLines[a].YA * scaleFactor - offset;
+        uLines[a].XB = uLines[a].XB * scaleFactor - offset;
+        uLines[a].YB =uLines[a].YB * scaleFactor - offset;
+    }
+    for(int a = 0; a < oLines.size(); a++)
+    {
+        oLines[a].XA = oLines[a].XA * scaleFactor - offset;
+        oLines[a].YA = oLines[a].YA * scaleFactor - offset;
+        oLines[a].XB = oLines[a].XB * scaleFactor - offset;
+        oLines[a].YB = oLines[a].YB * scaleFactor - offset;
+    }
+
+
+
+    QSvgGenerator generator;
+    generator.setFileName("image.svg");
+    generator.setSize(QSize(maxW, maxH));
+    generator.setViewBox(QRect(0, 0, maxW, maxH));
+    generator.setTitle(tr("Islamic Star Pattern"));
+    generator.setDescription(tr("Islamic Star Pattern"));
+
+    QPainter painter;
+    painter.begin(&generator);
+
+    // draw
+    painter.setClipRect(QRect(0, 0, maxW, maxH));
+
+    painter.setPen(QPen(Qt::red, 0.01, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < tilingLines.size(); a++)
+    {
+        ALine aLine = tilingLines[a];
+
+        painter.drawLine(QPointF(aLine.XA, aLine.YA),
+                         QPointF(aLine.XB, aLine.YB));
+
+
+    }
+
+    QBrush ribbonBrush;
+    QVector3D ribVec = SystemParams::ribbon_color;
+    QVector3D lineVec = SystemParams::interlacing_color;
+    QVector3D starVec = SystemParams::star_color;
+    QColor starCol(starVec.x() * 255, starVec.y() * 255, starVec.z() * 255);
+    QColor ribCol(ribVec.x() * 255, ribVec.y() * 255, ribVec.z() * 255);
+    QColor lineCol(lineVec.x() * 255, lineVec.y() * 255, lineVec.z() * 255);
+
+    ribbonBrush.setColor(starCol);
+    ribbonBrush.setStyle(Qt::SolidPattern);
+    painter.setPen(QPen(starCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < triangleLines.size(); a += 3)
+    {
+        ALine line1 = triangleLines[a];
+        ALine line2 = triangleLines[a+1];
+        ALine line3 = triangleLines[a+2];
+
+        QPolygonF poly;
+        poly << QPointF(line1.XA, line1.YA)
+             << QPointF(line1.XB, line1.YB)
+             << QPointF(line3.XA, line3.YA);
+
+        QPainterPath path;
+        path.addPolygon(poly);
+        painter.drawPolygon(poly);
+        painter.fillPath(path, ribbonBrush);
+    }
+
+    ribbonBrush.setColor(ribCol);
+    ribbonBrush.setStyle(Qt::SolidPattern);
+    painter.setPen(QPen(ribCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < uLines.size(); a += 2)
+    {
+        ALine line1 = uLines[a];
+        ALine line2 = uLines[a+1];
+
+        QPolygonF poly;
+        poly << QPointF(line1.XA, line1.YA)
+             << QPointF(line1.XB, line1.YB)
+             << QPointF(line2.XB, line2.YB)
+             << QPointF(line2.XA, line2.YA);
+
+        QPainterPath path;
+        path.addPolygon(poly);
+        painter.drawPolygon(poly);
+        painter.fillPath(path, ribbonBrush);
+    }
+
+    painter.setPen(QPen(lineCol, 0.08, Qt::SolidLine, Qt::SquareCap));
+    for(int a = 0; a < uLines.size(); a++)
+    {
+        ALine aLine = uLines[a];
+        painter.drawLine(QPointF(aLine.XA, aLine.YA),
+                         QPointF(aLine.XB, aLine.YB));
+
+
+    }
+
+
+    ribbonBrush.setColor(ribCol);
+    ribbonBrush.setStyle(Qt::SolidPattern);
+    painter.setPen(QPen(ribCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < oLines.size(); a += 2)
+    {
+        ALine line1 = oLines[a];
+        ALine line2 = oLines[a+1];
+
+        QPolygonF poly;
+        poly << QPointF(line1.XA, line1.YA)
+             << QPointF(line1.XB, line1.YB)
+             << QPointF(line2.XB, line2.YB)
+             << QPointF(line2.XA, line2.YA);
+
+        QPainterPath path;
+        path.addPolygon(poly);
+        painter.drawPolygon(poly);
+        painter.fillPath(path, ribbonBrush);
+    }
+
+    painter.setPen(QPen(lineCol, 0.08, Qt::SolidLine, Qt::SquareCap));
+    for(int a = 0; a < oLines.size(); a++)
+    {
+        ALine aLine = oLines[a];
+
+        painter.drawLine(QPointF(aLine.XA, aLine.YA),
+                         QPointF(aLine.XB, aLine.YB));
+    }
+
+
+    painter.end();
+
 }
 
 void GLWidget::PaintCurve()
