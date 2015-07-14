@@ -5,13 +5,14 @@
 #include <cmath>
 
 std::string SystemParams::default_tiling = "3.4.12 RD";
-//std::string SystemParams::default_tiling = "4.4.4.4";
 
-bool SystemParams::show_tiling = true;
+bool SystemParams::show_tiling = false;
 
 float SystemParams::rad_angle = M_PI / 4.0f;
 
 float SystemParams::ribbon_width = 0.02;
+
+float SystemParams::line_width = 0.006;
 
 float SystemParams::contact_delta = 0.0;
 

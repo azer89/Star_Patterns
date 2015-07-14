@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->hSpinBox, SIGNAL(valueChanged(int)),    this, SLOT(ParamsChanged()));
     connect(ui->contactDeltaSpinBox, SIGNAL(valueChanged(double)),    this, SLOT(ParamsChanged()));
     connect(ui->rWidthSpinBox, SIGNAL(valueChanged(double)),    this, SLOT(ParamsChanged()));
+    connect(ui->lineWidthSpinBox, SIGNAL(valueChanged(double)),    this, SLOT(ParamsChanged()));
     connect(ui->tilingCheckBox,	 SIGNAL(stateChanged(int)), this, SLOT(ParamsChanged()));
 
     connect(ui->starColorButton,	 SIGNAL(clicked()), this, SLOT(StarColorChanged()));
@@ -191,6 +192,7 @@ void MainWindow::ParamsChanged()
     float radAngle = degAngle * M_PI / 180.0;
     SystemParams::rad_angle = radAngle;
     SystemParams::ribbon_width = ui->rWidthSpinBox->value();
+    SystemParams::line_width = ui->lineWidthSpinBox->value();
     SystemParams::w = ui->wSpinBox->value();
     SystemParams::h = ui->hSpinBox->value();
     SystemParams::show_tiling = ui->tilingCheckBox->isChecked();

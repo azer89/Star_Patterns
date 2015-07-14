@@ -500,13 +500,13 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="0" colspan="2">
+     <item row="7" column="0" colspan="2">
       <widget class="QCheckBox" name="tilingCheckBox">
        <property name="text">
         <string>Show Tiling</string>
        </property>
        <property name="checked">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -687,6 +687,13 @@
        </property>
       </widget>
      </item>
+     <item row="4" column="0" colspan="2">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Contact Delta</string>
+       </property>
+      </widget>
+     </item>
      <item row="4" column="2">
       <widget class="QDoubleSpinBox" name="contactDeltaSpinBox">
        <property name="maximumSize">
@@ -703,6 +710,13 @@
        </property>
        <property name="singleStep">
         <double>0.010000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="0" colspan="2">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Ribbon Width</string>
        </property>
       </widget>
      </item>
@@ -725,20 +739,6 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>Contact Delta</string>
-       </property>
-      </widget>
-     </item>
-     <item row="5" column="0" colspan="2">
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>Ribbon Width</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="0" colspan="2">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -746,7 +746,7 @@
        </property>
       </widget>
      </item>
-     <item row="7" column="0" colspan="3">
+     <item row="8" column="0" colspan="3">
       <widget class="QPushButton" name="starColorButton">
        <property name="text">
         <string>Star Color</string>
@@ -756,7 +756,7 @@
        </property>
       </widget>
      </item>
-     <item row="8" column="0" colspan="3">
+     <item row="9" column="0" colspan="3">
       <widget class="QPushButton" name="ribbonColorButton">
        <property name="text">
         <string>Ribbon Color</string>
@@ -766,7 +766,17 @@
        </property>
       </widget>
      </item>
-     <item row="9" column="0" colspan="3">
+     <item row="11" column="0" colspan="3">
+      <widget class="QPushButton" name="interlacingColorButton">
+       <property name="text">
+        <string>Line Color</string>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0" colspan="3">
       <widget class="QPushButton" name="backgroundColorButton">
        <property name="text">
         <string>Background Color</string>
@@ -776,13 +786,26 @@
        </property>
       </widget>
      </item>
-     <item row="10" column="0" colspan="3">
-      <widget class="QPushButton" name="interlacingColorButton">
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_6">
        <property name="text">
-        <string>Line Color</string>
+        <string>Line Width</string>
        </property>
-       <property name="flat">
-        <bool>true</bool>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QDoubleSpinBox" name="lineWidthSpinBox">
+       <property name="decimals">
+        <number>4</number>
+       </property>
+       <property name="maximum">
+        <double>2.000000000000000</double>
+       </property>
+       <property name="singleStep">
+        <double>0.001000000000000</double>
+       </property>
+       <property name="value">
+        <double>0.006000000000000</double>
        </property>
       </widget>
      </item>

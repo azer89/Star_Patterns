@@ -18,6 +18,8 @@ public:
 
     static float ribbon_width;
 
+    static float line_width;
+
     static float contact_delta;
 
     static int w;

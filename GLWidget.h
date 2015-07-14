@@ -114,6 +114,8 @@ public:
 
     void GeneratePattern(std::string tilingName);
 
+    void ResizeLines(std::vector<ALine> &lines, AVector offsetVec, float scaleFactor);
+
     /*void IncreaseDiv()
     {
         std::cout << "increase\n";

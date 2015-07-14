@@ -285,9 +285,25 @@ void GLWidget::PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo
     linesVao->release();
 }
 
+
+void GLWidget::ResizeLines(std::vector<ALine> &lines, AVector offsetVec, float scaleFactor)
+{
+    for(int a = 0; a < lines.size(); a++)
+    {
+        lines[a].XA -= offsetVec.x;
+        lines[a].YA -= offsetVec.y;
+        lines[a].XB -= offsetVec.x;
+        lines[a].YB -= offsetVec.y;
+        lines[a].XA *= scaleFactor;
+        lines[a].YA *= scaleFactor;
+        lines[a].XB *= scaleFactor;
+        lines[a].YB *= scaleFactor;
+    }
+}
+
+
 void GLWidget::SaveToSvg()
 {
-    //std::cout << "save SVG\n";
     std::vector<ALine> tilingLines = _patternGenerator->GetTilingLines();
     std::vector<ALine> uLines = _patternGenerator->GetULines();
     std::vector<ALine> oLines = _patternGenerator->GetOLines();
@@ -295,91 +311,38 @@ void GLWidget::SaveToSvg()
     std::vector<ALine> backTriangleLines = _patternGenerator->GetBackTriangleLines();
     std::vector<ALine> addTriangleLines = _patternGenerator->GetAddTriangleLines();
 
-    //int maxW = 500;
-    //int maxH = 500;
-    int maxW = 300;
-    int maxH = 300;
-    float scaleFactor = 50.0f;
-    float offset = 1250.0f;
+    float xLeft = 0 + _scrollOffset.x();
+    float yTop = 0 + _scrollOffset.y();
 
-    // rescale
-    for(int a = 0; a < tilingLines.size(); a++)
-    {
-        tilingLines[a].XA = tilingLines[a].XA * scaleFactor - offset;
-        tilingLines[a].YA = tilingLines[a].YA * scaleFactor - offset;
-        tilingLines[a].XB = tilingLines[a].XB * scaleFactor - offset;
-        tilingLines[a].YB = tilingLines[a].YB * scaleFactor - offset;
-    }
-    for(int a = 0; a < triangleLines.size(); a++)
-    {
-        triangleLines[a].XA = triangleLines[a].XA * scaleFactor - offset;
-        triangleLines[a].YA = triangleLines[a].YA * scaleFactor - offset;
-        triangleLines[a].XB = triangleLines[a].XB * scaleFactor - offset;
-        triangleLines[a].YB = triangleLines[a].YB * scaleFactor - offset;
-    }
-    for(int a = 0; a < backTriangleLines.size(); a++)
-    {
-        backTriangleLines[a].XA = backTriangleLines[a].XA * scaleFactor - offset;
-        backTriangleLines[a].YA = backTriangleLines[a].YA * scaleFactor - offset;
-        backTriangleLines[a].XB = backTriangleLines[a].XB * scaleFactor - offset;
-        backTriangleLines[a].YB = backTriangleLines[a].YB * scaleFactor - offset;
-    }
-    for(int a = 0; a < addTriangleLines.size(); a++)
-    {
-        addTriangleLines[a].XA = addTriangleLines[a].XA * scaleFactor - offset;
-        addTriangleLines[a].YA = addTriangleLines[a].YA * scaleFactor - offset;
-        addTriangleLines[a].XB = addTriangleLines[a].XB * scaleFactor - offset;
-        addTriangleLines[a].YB = addTriangleLines[a].YB * scaleFactor - offset;
-    }
-    for(int a = 0; a < uLines.size(); a++)
-    {
-        uLines[a].XA = uLines[a].XA * scaleFactor - offset;
-        uLines[a].YA = uLines[a].YA * scaleFactor - offset;
-        uLines[a].XB = uLines[a].XB * scaleFactor - offset;
-        uLines[a].YB =uLines[a].YB * scaleFactor - offset;
-    }
-    for(int a = 0; a < oLines.size(); a++)
-    {
-        oLines[a].XA = oLines[a].XA * scaleFactor - offset;
-        oLines[a].YA = oLines[a].YA * scaleFactor - offset;
-        oLines[a].XB = oLines[a].XB * scaleFactor - offset;
-        oLines[a].YB = oLines[a].YB * scaleFactor - offset;
-    }
+    float invScale = 1.0 / this->_zoomFactor;
+    xLeft   *= invScale;
+    yTop    *= invScale;
 
+    AVector offsetVec(xLeft, yTop);
 
+    ResizeLines(tilingLines,       offsetVec, _zoomFactor);
+    ResizeLines(uLines,            offsetVec, _zoomFactor);
+    ResizeLines(oLines,            offsetVec, _zoomFactor);
+    ResizeLines(triangleLines,     offsetVec, _zoomFactor);
+    ResizeLines(backTriangleLines, offsetVec, _zoomFactor);
+    ResizeLines(addTriangleLines,  offsetVec, _zoomFactor);
 
     QSvgGenerator generator;
     generator.setFileName("image.svg");
-    generator.setSize(QSize(maxW, maxH));
-    generator.setViewBox(QRect(0, 0, maxW, maxH));
+    generator.setSize(QSize(this->width(), this->height()));
+    generator.setViewBox(QRect(0, 0, this->width(), this->height()));
     generator.setTitle(tr("Islamic Star Pattern"));
     generator.setDescription(tr("Islamic Star Pattern"));
-
     QPainter painter;
     painter.begin(&generator);
-
-    // draw
-    painter.setClipRect(QRect(0, 0, maxW, maxH));
-
-    /*
-    painter.setPen(QPen(Qt::red, 0.01, Qt::SolidLine, Qt::RoundCap));
-    for(int a = 0; a < tilingLines.size(); a++)
-    {
-        ALine aLine = tilingLines[a];
-
-        painter.drawLine(QPointF(aLine.XA, aLine.YA),
-                         QPointF(aLine.XB, aLine.YB));
-
-
-    }*/
+    painter.setClipRect(QRect(0, 0, this->width(), this->height()));
 
     QBrush myBrush;
-
     QVector3D backVec = SystemParams::background_color;
     QColor backCol(backVec.x() * 255, backVec.y() * 255, backVec.z() * 255);
     myBrush.setColor(backCol);
     myBrush.setStyle(Qt::SolidPattern);
-    painter.fillRect(QRect(0, 0, maxW, maxH), myBrush);
+    painter.fillRect(QRect(0, 0, this->width(), this->height()), myBrush);
 
     QVector3D ribVec = SystemParams::ribbon_color;
     QVector3D lineVec = SystemParams::interlacing_color;
@@ -472,14 +435,12 @@ void GLWidget::SaveToSvg()
         painter.fillPath(path, myBrush);
     }
 
-    painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));
+    painter.setPen(QPen(lineCol, SystemParams::line_width * _zoomFactor, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < uLines.size(); a++)
     {
         ALine aLine = uLines[a];
         painter.drawLine(QPointF(aLine.XA, aLine.YA),
                          QPointF(aLine.XB, aLine.YB));
-
-
     }
 
 
@@ -503,7 +464,7 @@ void GLWidget::SaveToSvg()
         painter.fillPath(path, myBrush);
     }
 
-    painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));
+    painter.setPen(QPen(lineCol, SystemParams::line_width * _zoomFactor, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < oLines.size(); a++)
     {
         ALine aLine = oLines[a];

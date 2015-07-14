@@ -293,9 +293,6 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             CalculateInterlace(lineCombination2[a], aShape, _uLines, _oLines);
         }
 
-        //std::vector<ALine> triangles1;
-        //std::vector<ALine> triangles2;
-
         if(SystemParams::contact_delta > -eps_val && SystemParams::contact_delta < eps_val)
         {
             std::vector<ALine> triangles1 = Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());
@@ -312,15 +309,14 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             _addTriangleLines.insert( _addTriangleLines.end(), triangles3.begin(), triangles3.end() );
             _backTriangleLines.insert( _backTriangleLines.end(), triangles2.begin(), triangles2.end() );
         }
-
-        //Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());
-        //_triangleLines.insert( _triangleLines.end(), triangles1.begin(), triangles1.end() );
-        //_backTriangleLines.insert( _backTriangleLines.end(), triangles2.begin(), triangles2.end() );
-
     }
 
-    //PreparePointsVAO(_tempPoints, &_tempPointsVbo, &_tempPointsVao, QVector3D(1, 0, 0));
+    // debug
+    //_tempLines.insert( _tempLines.end(), _triangleLines.begin(), _triangleLines.end() );
+    //_tempLines.insert( _tempLines.end(), _addTriangleLines.begin(), _addTriangleLines.end() );
+    //_tempLines.insert( _tempLines.end(), _backTriangleLines.begin(), _backTriangleLines.end() );
     //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 1, 0));
+
     PrepareTrianglesVAO(_triangleLines, &_trianglesVbo, &_trianglesVao, SystemParams::star_color);
     PrepareTrianglesVAO(_addTriangleLines, &_addTrianglesVbo, &_addTrianglesVao, SystemParams::star_color);
     PrepareTrianglesVAO(_backTriangleLines, &_backTrianglesVbo, &_backTrianglesVao, SystemParams::background_color);
@@ -334,8 +330,6 @@ void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::
 {
     ALine aLine1 = segment.first;
     ALine aLine2 = segment.second;
-    //ALine ray1(aLine1.GetPointA(), aLine1.Direction().Norm());
-    //ALine ray2(aLine2.GetPointA(), aLine2.Direction().Norm());
     AVector dir1 = aLine1.Direction().Norm();
     AVector dir2 = aLine2.Direction().Norm();
 
@@ -554,6 +548,14 @@ void PatternGenerator::Paint(float zoomFactor)
 {
     _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
 
+    if(_tempLines.size() != 0)
+    {
+        glLineWidth(1.0f);
+        _tempLinesVao.bind();
+        glDrawArrays(GL_LINES, 0, _tempLines.size() * 2);
+        _tempLinesVao.release();
+    }
+
     if(_tempPointsVao.isCreated())
     {
         glPointSize(10.0f);
@@ -566,7 +568,7 @@ void PatternGenerator::Paint(float zoomFactor)
     {
         _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
         _uLinesVao.bind();
-        glLineWidth(0.006f * zoomFactor);
+        glLineWidth(SystemParams::line_width  * zoomFactor);
         glDrawArrays(GL_LINES, 0, _uLines.size() * 2);
         _uLinesVao.release();
     }
@@ -583,7 +585,7 @@ void PatternGenerator::Paint(float zoomFactor)
     {
         _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
         _oLinesVao.bind();
-        glLineWidth(0.006f * zoomFactor);
+        glLineWidth(SystemParams::line_width  * zoomFactor);
         glDrawArrays(GL_LINES, 0, _oLines.size() * 2);
         _oLinesVao.release();
     }

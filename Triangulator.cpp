@@ -35,7 +35,7 @@ std::vector<ALine> Triangulator::GetTriangles2(std::vector<ALine> shape, AVector
     list_of_seeds.push_back(Point(seedPt.x, seedPt.y));
 
     CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(),
-                                   Criteria());
+                                   Criteria(0.125, 0));
 
     for(CDT::Finite_faces_iterator fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit)
     {
@@ -117,7 +117,7 @@ std::vector<ALine> Triangulator::GetTriangles1(std::vector<std::pair<ALine, ALin
     list_of_seeds.push_back(Point(seedPt.x, seedPt.y));
     //list_of_seeds.push_back(Point(0, 0));
     CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(),
-                                   Criteria());
+                                   Criteria(0.125, 0));
 
     for(CDT::Finite_faces_iterator fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); ++fit)
     {
