@@ -54,7 +54,7 @@ std::vector<ALine> Triangulator::GetTriangles2(std::vector<ALine> shape, AVector
     return triangles;
 }
 
-std::vector<ALine> Triangulator::GetTriangles0(std::vector<std::pair<ALine, ALine>> shape, std::vector<ALine> poly)
+std::vector<ALine> Triangulator::GetTriangles3(std::vector<std::pair<ALine, ALine>> shape, std::vector<ALine> poly)
 {
     std::vector<ALine> triangles;
 

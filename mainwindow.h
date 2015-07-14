@@ -22,6 +22,10 @@ private:
 private slots:
     void ItemClicked(QTreeWidgetItem * item, int column);
     void ParamsChanged();
+    void StarColorChanged();
+    void RibbonColorChanged();
+    void BackgroundColorChanged();
+    void InterlacingColorChanged();
     void SaveSVG();
 };
 

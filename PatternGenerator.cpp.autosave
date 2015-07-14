@@ -302,7 +302,7 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
         else
         {
             triangles1 = Triangulator::GetTriangles2(aShape, AVector(-10, -10));
-            triangles2 = Triangulator::GetTriangles0(lineCombination2, aShape);
+            triangles2 = Triangulator::GetTriangles3(lineCombination2, aShape);
         }
 
         //Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());

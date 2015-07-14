@@ -39,7 +39,8 @@ void GLWidget::initializeGL()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor( 1.0, 1.0, 1.0, 1.0 );
+    QVector3D backColor = SystemParams::background_color;
+    glClearColor( backColor.x(), backColor.y(), backColor.z(), 1.0 );
     glEnable(GL_DEPTH_TEST);
 
     _shaderProgram = new QOpenGLShaderProgram();
@@ -88,6 +89,9 @@ void GLWidget::resizeGL(int width, int height)
 
 void GLWidget::paintGL()
 {
+    QVector3D backColor = SystemParams::background_color;
+    glClearColor( backColor.x(), backColor.y(), backColor.z(), 1.0 );
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glViewport(0, 0, this->width(),  this->height());
@@ -289,10 +293,12 @@ void GLWidget::SaveToSvg()
     std::vector<ALine> oLines = _patternGenerator->GetOLines();
     std::vector<ALine> triangleLines = _patternGenerator->GetTriangleLines();
 
-    int maxW = 100;
-    int maxH = 100;
-    float scaleFactor = 10.0f;
-    float offset = 250.0f;
+    //int maxW = 500;
+    //int maxH = 500;
+    int maxW = 300;
+    int maxH = 300;
+    float scaleFactor = 50.0f;
+    float offset = 1250.0f;
 
     // rescale
     for(int a = 0; a < tilingLines.size(); a++)
@@ -339,6 +345,7 @@ void GLWidget::SaveToSvg()
     // draw
     painter.setClipRect(QRect(0, 0, maxW, maxH));
 
+    /*
     painter.setPen(QPen(Qt::red, 0.01, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < tilingLines.size(); a++)
     {
@@ -348,9 +355,16 @@ void GLWidget::SaveToSvg()
                          QPointF(aLine.XB, aLine.YB));
 
 
-    }
+    }*/
 
     QBrush ribbonBrush;
+
+    QVector3D backVec = SystemParams::background_color;
+    QColor backCol(backVec.x() * 255, backVec.y() * 255, backVec.z() * 255);
+    ribbonBrush.setColor(backCol);
+    ribbonBrush.setStyle(Qt::SolidPattern);
+    painter.fillRect(QRect(0, 0, maxW, maxH), ribbonBrush);
+
     QVector3D ribVec = SystemParams::ribbon_color;
     QVector3D lineVec = SystemParams::interlacing_color;
     QVector3D starVec = SystemParams::star_color;
@@ -360,7 +374,7 @@ void GLWidget::SaveToSvg()
 
     ribbonBrush.setColor(starCol);
     ribbonBrush.setStyle(Qt::SolidPattern);
-    painter.setPen(QPen(starCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(starCol, 0.75, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < triangleLines.size(); a += 3)
     {
         ALine line1 = triangleLines[a];
@@ -380,7 +394,7 @@ void GLWidget::SaveToSvg()
 
     ribbonBrush.setColor(ribCol);
     ribbonBrush.setStyle(Qt::SolidPattern);
-    painter.setPen(QPen(ribCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(ribCol, 0.25, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < uLines.size(); a += 2)
     {
         ALine line1 = uLines[a];
@@ -398,7 +412,7 @@ void GLWidget::SaveToSvg()
         painter.fillPath(path, ribbonBrush);
     }
 
-    painter.setPen(QPen(lineCol, 0.08, Qt::SolidLine, Qt::SquareCap));
+    painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));
     for(int a = 0; a < uLines.size(); a++)
     {
         ALine aLine = uLines[a];
@@ -411,7 +425,7 @@ void GLWidget::SaveToSvg()
 
     ribbonBrush.setColor(ribCol);
     ribbonBrush.setStyle(Qt::SolidPattern);
-    painter.setPen(QPen(ribCol, 0.04, Qt::SolidLine, Qt::RoundCap));
+    painter.setPen(QPen(ribCol, 0.25, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < oLines.size(); a += 2)
     {
         ALine line1 = oLines[a];
@@ -429,7 +443,7 @@ void GLWidget::SaveToSvg()
         painter.fillPath(path, ribbonBrush);
     }
 
-    painter.setPen(QPen(lineCol, 0.08, Qt::SolidLine, Qt::SquareCap));
+    painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));
     for(int a = 0; a < oLines.size(); a++)
     {
         ALine aLine = oLines[a];

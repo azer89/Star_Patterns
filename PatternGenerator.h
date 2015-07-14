@@ -89,6 +89,11 @@ private:
     QOpenGLBuffer               _trianglesVbo;
     QOpenGLVertexArrayObject    _trianglesVao;
 
+    // triangles
+    std::vector<ALine>          _backTriangleLines;
+    QOpenGLBuffer               _backTrianglesVbo;
+    QOpenGLVertexArrayObject    _backTrianglesVao;
+
     // under
     //std::vector<RibbonSegment>  _uSegments;
     std::vector<ALine>  _uLines;

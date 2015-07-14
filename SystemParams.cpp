@@ -13,6 +13,8 @@ float SystemParams::rad_angle = M_PI / 4.0f;
 
 float SystemParams::ribbon_width = 0.02;
 
+float SystemParams::contact_delta = 0.0;
+
 int SystemParams::w = 1;
 int SystemParams::h = 1;
 
