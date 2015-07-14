@@ -18,7 +18,8 @@ static std::vector<ALine> GetTriangles4(std::vector<std::pair<ALine, ALine>> sha
 
 private:
 // to do: brute force
-static ALine SearchLine(std::vector<std::pair<ALine, ALine>> shape);
+static ALine SearchLine(std::vector<std::pair<ALine, ALine>> shape, int side, bool isRight);
+static AVector GetIntersection(ALine line1, ALine line2);
 
 };
 

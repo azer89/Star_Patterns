@@ -292,6 +292,8 @@ void GLWidget::SaveToSvg()
     std::vector<ALine> uLines = _patternGenerator->GetULines();
     std::vector<ALine> oLines = _patternGenerator->GetOLines();
     std::vector<ALine> triangleLines = _patternGenerator->GetTriangleLines();
+    std::vector<ALine> backTriangleLines = _patternGenerator->GetBackTriangleLines();
+    std::vector<ALine> addTriangleLines = _patternGenerator->GetAddTriangleLines();
 
     //int maxW = 500;
     //int maxH = 500;
@@ -314,6 +316,20 @@ void GLWidget::SaveToSvg()
         triangleLines[a].YA = triangleLines[a].YA * scaleFactor - offset;
         triangleLines[a].XB = triangleLines[a].XB * scaleFactor - offset;
         triangleLines[a].YB = triangleLines[a].YB * scaleFactor - offset;
+    }
+    for(int a = 0; a < backTriangleLines.size(); a++)
+    {
+        backTriangleLines[a].XA = backTriangleLines[a].XA * scaleFactor - offset;
+        backTriangleLines[a].YA = backTriangleLines[a].YA * scaleFactor - offset;
+        backTriangleLines[a].XB = backTriangleLines[a].XB * scaleFactor - offset;
+        backTriangleLines[a].YB = backTriangleLines[a].YB * scaleFactor - offset;
+    }
+    for(int a = 0; a < addTriangleLines.size(); a++)
+    {
+        addTriangleLines[a].XA = addTriangleLines[a].XA * scaleFactor - offset;
+        addTriangleLines[a].YA = addTriangleLines[a].YA * scaleFactor - offset;
+        addTriangleLines[a].XB = addTriangleLines[a].XB * scaleFactor - offset;
+        addTriangleLines[a].YB = addTriangleLines[a].YB * scaleFactor - offset;
     }
     for(int a = 0; a < uLines.size(); a++)
     {
@@ -357,13 +373,13 @@ void GLWidget::SaveToSvg()
 
     }*/
 
-    QBrush ribbonBrush;
+    QBrush myBrush;
 
     QVector3D backVec = SystemParams::background_color;
     QColor backCol(backVec.x() * 255, backVec.y() * 255, backVec.z() * 255);
-    ribbonBrush.setColor(backCol);
-    ribbonBrush.setStyle(Qt::SolidPattern);
-    painter.fillRect(QRect(0, 0, maxW, maxH), ribbonBrush);
+    myBrush.setColor(backCol);
+    myBrush.setStyle(Qt::SolidPattern);
+    painter.fillRect(QRect(0, 0, maxW, maxH), myBrush);
 
     QVector3D ribVec = SystemParams::ribbon_color;
     QVector3D lineVec = SystemParams::interlacing_color;
@@ -372,8 +388,9 @@ void GLWidget::SaveToSvg()
     QColor ribCol(ribVec.x() * 255, ribVec.y() * 255, ribVec.z() * 255);
     QColor lineCol(lineVec.x() * 255, lineVec.y() * 255, lineVec.z() * 255);
 
-    ribbonBrush.setColor(starCol);
-    ribbonBrush.setStyle(Qt::SolidPattern);
+    // star triangles
+    myBrush.setColor(starCol);
+    myBrush.setStyle(Qt::SolidPattern);
     painter.setPen(QPen(starCol, 0.75, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < triangleLines.size(); a += 3)
     {
@@ -389,11 +406,54 @@ void GLWidget::SaveToSvg()
         QPainterPath path;
         path.addPolygon(poly);
         painter.drawPolygon(poly);
-        painter.fillPath(path, ribbonBrush);
+        painter.fillPath(path, myBrush);
     }
 
-    ribbonBrush.setColor(ribCol);
-    ribbonBrush.setStyle(Qt::SolidPattern);
+    // back triangles
+    myBrush.setColor(backCol);
+    myBrush.setStyle(Qt::SolidPattern);
+    painter.setPen(QPen(backCol, 0.75, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < backTriangleLines.size(); a += 3)
+    {
+        ALine line1 = backTriangleLines[a];
+        ALine line2 = backTriangleLines[a+1];
+        ALine line3 = backTriangleLines[a+2];
+
+        QPolygonF poly;
+        poly << QPointF(line1.XA, line1.YA)
+             << QPointF(line1.XB, line1.YB)
+             << QPointF(line3.XA, line3.YA);
+
+        QPainterPath path;
+        path.addPolygon(poly);
+        painter.drawPolygon(poly);
+        painter.fillPath(path, myBrush);
+    }
+
+    // add triangles
+    myBrush.setColor(starCol);
+    myBrush.setStyle(Qt::SolidPattern);
+    painter.setPen(QPen(starCol, 0.75, Qt::SolidLine, Qt::RoundCap));
+    for(int a = 0; a < addTriangleLines.size(); a += 3)
+    {
+        ALine line1 = addTriangleLines[a];
+        ALine line2 = addTriangleLines[a+1];
+        ALine line3 = addTriangleLines[a+2];
+
+        QPolygonF poly;
+        poly << QPointF(line1.XA, line1.YA)
+             << QPointF(line1.XB, line1.YB)
+             << QPointF(line3.XA, line3.YA);
+
+        QPainterPath path;
+        path.addPolygon(poly);
+        painter.drawPolygon(poly);
+        painter.fillPath(path, myBrush);
+    }
+
+    // under ribbons
+    myBrush.setColor(ribCol);
+    myBrush.setStyle(Qt::SolidPattern);
     painter.setPen(QPen(ribCol, 0.25, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < uLines.size(); a += 2)
     {
@@ -409,7 +469,7 @@ void GLWidget::SaveToSvg()
         QPainterPath path;
         path.addPolygon(poly);
         painter.drawPolygon(poly);
-        painter.fillPath(path, ribbonBrush);
+        painter.fillPath(path, myBrush);
     }
 
     painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));
@@ -423,8 +483,8 @@ void GLWidget::SaveToSvg()
     }
 
 
-    ribbonBrush.setColor(ribCol);
-    ribbonBrush.setStyle(Qt::SolidPattern);
+    myBrush.setColor(ribCol);
+    myBrush.setStyle(Qt::SolidPattern);
     painter.setPen(QPen(ribCol, 0.25, Qt::SolidLine, Qt::RoundCap));
     for(int a = 0; a < oLines.size(); a += 2)
     {
@@ -440,7 +500,7 @@ void GLWidget::SaveToSvg()
         QPainterPath path;
         path.addPolygon(poly);
         painter.drawPolygon(poly);
-        painter.fillPath(path, ribbonBrush);
+        painter.fillPath(path, myBrush);
     }
 
     painter.setPen(QPen(lineCol, 0.5, Qt::SolidLine, Qt::SquareCap));

@@ -144,6 +144,7 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
     _tempPoints.clear();
     _triangleLines.clear();
     _backTriangleLines.clear();
+    _addTriangleLines.clear();
     _tempLines.clear();
     _uLines.clear();
     _oLines.clear();
@@ -292,28 +293,36 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
             CalculateInterlace(lineCombination2[a], aShape, _uLines, _oLines);
         }
 
-        std::vector<ALine> triangles1;
-        std::vector<ALine> triangles2;
+        //std::vector<ALine> triangles1;
+        //std::vector<ALine> triangles2;
 
         if(SystemParams::contact_delta > -eps_val && SystemParams::contact_delta < eps_val)
         {
-            triangles1 = Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());
+            std::vector<ALine> triangles1 = Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());
+
+            _triangleLines.insert( _triangleLines.end(), triangles1.begin(), triangles1.end() );
         }
         else
         {
-            triangles1 = Triangulator::GetTriangles2(aShape, AVector(-10, -10));
-            triangles2 = Triangulator::GetTriangles0(lineCombination2, aShape);
+            std::vector<ALine> triangles1 = Triangulator::GetTriangles2(aShape, AVector(-10, -10));
+            std::vector<ALine> triangles2 = Triangulator::GetTriangles3(lineCombination2, aShape);
+            std::vector<ALine> triangles3 = Triangulator::GetTriangles4(lineCombination2, aShape);
+
+            _triangleLines.insert( _triangleLines.end(), triangles1.begin(), triangles1.end() );
+            _addTriangleLines.insert( _addTriangleLines.end(), triangles3.begin(), triangles3.end() );
+            _backTriangleLines.insert( _backTriangleLines.end(), triangles2.begin(), triangles2.end() );
         }
 
         //Triangulator::GetTriangles1(lineCombination2, aShape[0].GetPointA());
-        _triangleLines.insert( _triangleLines.end(), triangles1.begin(), triangles1.end() );
-        _backTriangleLines.insert( _backTriangleLines.end(), triangles2.begin(), triangles2.end() );
+        //_triangleLines.insert( _triangleLines.end(), triangles1.begin(), triangles1.end() );
+        //_backTriangleLines.insert( _backTriangleLines.end(), triangles2.begin(), triangles2.end() );
 
     }
 
     //PreparePointsVAO(_tempPoints, &_tempPointsVbo, &_tempPointsVao, QVector3D(1, 0, 0));
     //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 1, 0));
     PrepareTrianglesVAO(_triangleLines, &_trianglesVbo, &_trianglesVao, SystemParams::star_color);
+    PrepareTrianglesVAO(_addTriangleLines, &_addTrianglesVbo, &_addTrianglesVao, SystemParams::star_color);
     PrepareTrianglesVAO(_backTriangleLines, &_backTrianglesVbo, &_backTrianglesVao, SystemParams::background_color);
     PrepareQuadsVAO(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
     PrepareQuadsVAO(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
@@ -603,6 +612,13 @@ void PatternGenerator::Paint(float zoomFactor)
         _rayLinesVao.bind();
         glDrawArrays(GL_LINES, 0, _rayLines.size() * 2);
         _rayLinesVao.release();
+    }
+
+    if(_addTrianglesVao.isCreated())
+    {
+        _addTrianglesVao.bind();
+        glDrawArrays(GL_TRIANGLES, 0, _addTriangleLines.size());
+        _addTrianglesVao.release();
     }
 
     if(_backTrianglesVao.isCreated())

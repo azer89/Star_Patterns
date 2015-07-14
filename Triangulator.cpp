@@ -54,7 +54,7 @@ std::vector<ALine> Triangulator::GetTriangles2(std::vector<ALine> shape, AVector
     return triangles;
 }
 
-std::vector<ALine> Triangulator::GetTriangles0(std::vector<std::pair<ALine, ALine>> shape, std::vector<ALine> poly)
+std::vector<ALine> Triangulator::GetTriangles3(std::vector<std::pair<ALine, ALine>> shape, std::vector<ALine> poly)
 {
     std::vector<ALine> triangles;
 
@@ -138,3 +138,66 @@ std::vector<ALine> Triangulator::GetTriangles1(std::vector<std::pair<ALine, ALin
     //std::cout << "Number of vertices: " << triangles.size() << std::endl;
     return triangles;
 }
+
+std::vector<ALine> Triangulator::GetTriangles4(std::vector<std::pair<ALine, ALine>> shape, std::vector<ALine> poly)
+{
+    std::vector<ALine> triangles;
+
+    for(int a = 0; a < poly.size(); a++)
+    {
+        ALine rLine = SearchLine(shape, a, true);
+        ALine lLine = SearchLine(shape, a, false);
+
+        AVector intersection = GetIntersection(rLine, lLine);
+
+        //std::cout << rLine._side << " " << rLine._isRight << "\n";
+        //std::cout << lLine._side << " " << lLine._isRight << "\n";
+
+        triangles.push_back(ALine(rLine.GetPointA(), intersection));
+        triangles.push_back(ALine(intersection, lLine.GetPointA()));
+        triangles.push_back(ALine(lLine.GetPointA(), rLine.GetPointA()));
+    }
+
+    //std::cout << triangles.size() << "\n";
+    return triangles;
+}
+
+ALine Triangulator::SearchLine(std::vector<std::pair<ALine, ALine>> shape, int side, bool isRight)
+{
+    ALine retLine;
+
+    for(int a = 0; a < shape.size(); a++)
+    {
+        ALine line1 = shape[a].first;
+        ALine line2 = shape[a].second;
+
+        if(line1._side == side && line1._isRight == isRight)
+        {
+            //std::cout << "1\n";
+            return line1;
+        }
+        else if(line2._side == side && line2._isRight == isRight)
+        {
+            //std::cout << "2\n";
+            return line2;
+        }
+    }
+
+    //std::cout << "shit\n";
+    return retLine;
+}
+
+AVector Triangulator::GetIntersection(ALine line1, ALine line2)
+{
+    ALine rayA(line1.GetPointA(), line1.Direction().Norm());
+    ALine rayB(line2.GetPointA(), line2.Direction().Norm());
+
+    float dx = rayB.GetPointA().x - rayA.GetPointA().x;
+    float dy = rayB.GetPointA().y - rayA.GetPointA().y;
+    float det = rayB.GetPointB().x * rayA.GetPointB().y - rayB.GetPointB().y * rayA.GetPointB().x;
+    float u = (dy * rayB.GetPointB().x - dx * rayB.GetPointB().y) / det;
+    float v = (dy * rayA.GetPointB().x - dx * rayA.GetPointB().y) / det;
+
+    return rayA.GetPointA() + rayA.GetPointB() * u;
+}
+

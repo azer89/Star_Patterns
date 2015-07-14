@@ -26,6 +26,8 @@ public:
 
     std::vector<ALine> GetTilingLines() { return _tilingLines; }
     std::vector<ALine> GetTriangleLines() { return _triangleLines; }
+    std::vector<ALine> GetBackTriangleLines() { return _backTriangleLines; }
+    std::vector<ALine> GetAddTriangleLines() { return _addTriangleLines; }
     std::vector<ALine> GetULines() { return _uLines; }
     std::vector<ALine> GetOLines() { return _oLines; }
 
@@ -93,6 +95,11 @@ private:
     std::vector<ALine>          _backTriangleLines;
     QOpenGLBuffer               _backTrianglesVbo;
     QOpenGLVertexArrayObject    _backTrianglesVao;
+
+    // triangles
+    std::vector<ALine>          _addTriangleLines;
+    QOpenGLBuffer               _addTrianglesVbo;
+    QOpenGLVertexArrayObject    _addTrianglesVao;
 
     // under
     //std::vector<RibbonSegment>  _uSegments;
