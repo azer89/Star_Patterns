@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QPalette palette2 = ui->ribbonColorButton->palette();
     palette2.setColor(ui->ribbonColorButton->backgroundRole(), col2);
     palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255 - col2.red(), 255 - col2.green(), 255 - col2.blue()));
+    //palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255, 255 , 0));
+    //palette2.setColor(QPalette::Shadow, QColor(255, 255 , 0));
     ui->ribbonColorButton->setPalette(palette2);
 
     QVector3D colVec3 = SystemParams::background_color;

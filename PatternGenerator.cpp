@@ -317,13 +317,13 @@ void PatternGenerator::InferenceAlgorithm(std::vector<std::vector<ALine>> shapes
     //_tempLines.insert( _tempLines.end(), _backTriangleLines.begin(), _backTriangleLines.end() );
     //PrepareLinesVAO1(_tempLines, &_tempLinesVbo, &_tempLinesVao, QVector3D(0, 1, 0));
 
-    PrepareTrianglesVAO(_triangleLines, &_trianglesVbo, &_trianglesVao, SystemParams::star_color);
-    PrepareTrianglesVAO(_addTriangleLines, &_addTrianglesVbo, &_addTrianglesVao, SystemParams::star_color);
-    PrepareTrianglesVAO(_backTriangleLines, &_backTrianglesVbo, &_backTrianglesVao, SystemParams::background_color);
-    PrepareQuadsVAO(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
-    PrepareQuadsVAO(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
-    PrepareLinesVAO1(_uLines, &_uLinesVbo, &_uLinesVao, SystemParams::interlacing_color);
-    PrepareLinesVAO1(_oLines, &_oLinesVbo, &_oLinesVao, SystemParams::interlacing_color);
+    BuildTrianglesVertexData(_triangleLines, &_trianglesVbo, &_trianglesVao, SystemParams::star_color);
+    BuildTrianglesVertexData(_addTriangleLines, &_addTrianglesVbo, &_addTrianglesVao, SystemParams::star_color);
+    BuildTrianglesVertexData(_backTriangleLines, &_backTrianglesVbo, &_backTrianglesVao, SystemParams::background_color);
+    BuildQuadsVertexData(_uLines, &_uQuadsVbo, &_uQuadsVao, SystemParams::ribbon_color);
+    BuildQuadsVertexData(_oLines, &_oQuadsVbo, &_oQuadsVao, SystemParams::ribbon_color);
+    BuildLinesVertexData1(_uLines, &_uLinesVbo, &_uLinesVao, SystemParams::interlacing_color);
+    BuildLinesVertexData1(_oLines, &_oLinesVbo, &_oLinesVao, SystemParams::interlacing_color);
 }
 
 void PatternGenerator::CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines)
@@ -530,7 +530,7 @@ void PatternGenerator::GeneratePattern(std::string tilingName)
         }
     }
     InferenceAlgorithm(_shapes);
-    PrepareLinesVAO1(_tilingLines, &_tilingLinesVbo, &_tilingLinesVao, QVector3D(1.0, 0.0, 0.0));
+    BuildLinesVertexData1(_tilingLines, &_tilingLinesVbo, &_tilingLinesVao, QVector3D(1.0, 0.0, 0.0));
 }
 
 void PatternGenerator::InitTiling()
@@ -687,8 +687,6 @@ std::vector<AVector> PatternGenerator::GenerateNGon(float sides, float radius, f
         shape.push_back(AVector(xPt, yPt));
     }
 
-    //std::cout << "GenerateNGon " << shape[shape.size() - 1].Distance(shape[0]) << "\n";
-    //std::cout << "GenerateNGon " << shape.size() << "\n";
     int intSides = (int)sides;
     if(intSides != shape.size())
     {
@@ -698,7 +696,7 @@ std::vector<AVector> PatternGenerator::GenerateNGon(float sides, float radius, f
     return shape;
 }
 
-void PatternGenerator::PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao)
+void PatternGenerator::BuildLinesVertexData2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao)
 {
     if(linesVao->isCreated()) { linesVao->destroy(); }
 
@@ -745,7 +743,7 @@ void PatternGenerator::PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer*
     linesVao->release();
 }
 
-void PatternGenerator::PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2)
+void PatternGenerator::BuildLinesVertexData0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2)
 {
     if(linesVao->isCreated()) { linesVao->destroy(); }
 
@@ -788,7 +786,7 @@ void PatternGenerator::PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer*
 }
 
 
-void PatternGenerator::PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol)
+void PatternGenerator::BuildLinesVertexData1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol)
 {
     if(linesVao->isCreated()) { linesVao->destroy(); }
 
@@ -820,7 +818,7 @@ void PatternGenerator::PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer*
     linesVao->release();
 }
 
-void PatternGenerator::PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
+void PatternGenerator::BuildQuadsVertexData(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
 {
     if(vao->isCreated()) { vao->destroy(); }
 
@@ -856,7 +854,7 @@ void PatternGenerator::PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* 
     vao->release();
 }
 
-void PatternGenerator::PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol)
+void PatternGenerator::BuildPointsVertexData(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol)
 {
     if(ptsVao->isCreated())
     {
@@ -891,7 +889,7 @@ void PatternGenerator::PreparePointsVAO(std::vector<AVector> points, QOpenGLBuff
     ptsVao->release();
 }
 
-void PatternGenerator::PrepareTrianglesVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
+void PatternGenerator::BuildTrianglesVertexData(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol)
 {
     if(vao->isCreated()) { vao->destroy(); }
 

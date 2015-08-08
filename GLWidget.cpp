@@ -182,109 +182,6 @@ void GLWidget::VerticalScroll(int val) { _scrollOffset.setY(val); }
 void GLWidget::ZoomIn() { this->_zoomFactor += 10.0f; }
 void GLWidget::ZoomOut() { this->_zoomFactor -= 10.0f; if(this->_zoomFactor < 1.0f) _zoomFactor = 1.0f; }
 
-void GLWidget::InitCurve()
-{
-    _points.clear();
-
-    AVector centerPt(this->_img_width / 2, this->_img_height / 2);
-
-    float addValue = (M_PI * 2.0 / (float)6);
-    for(float a = 0.0; a < M_PI * 2.0; a += addValue)
-    {
-        float xPt = centerPt.x + 10 * sin(a);
-        float yPt = centerPt.y + 10 * cos(a);
-        _points.push_back(AVector(xPt, yPt));
-    }
-}
-
-void GLWidget::CreateCurveVAO()
-{
-    // POINTS VAO
-    QVector3D vecCol = QVector3D(1.0, 0.0, 0.0);
-    PreparePointsVAO(_points, &_pointsVbo, &_pointsVao, vecCol);
-
-    // LINES VAO
-    vecCol = QVector3D(0.0, 0.5, 1.0);
-    std::vector<ALine> lines;
-    for(uint a = 0; a < _points.size(); a++)
-    {
-        if(a < _points.size() - 1) { lines.push_back(ALine(_points[a], _points[a + 1])); }
-        else { lines.push_back(ALine(_points[a], _points[0])); }
-    }
-
-    // error
-    //PrepareLinesVAO(lines, &_tilingLinesVbo, &_tilingLinesVao, vecCol);
-}
-
-void GLWidget::PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol)
-{
-    if(ptsVao->isCreated())
-    {
-        ptsVao->destroy();
-    }
-
-    ptsVao->create();
-    ptsVao->bind();
-
-    QVector<VertexData> data;
-    for(uint a = 0; a < points.size(); a++)
-    {
-        data.append(VertexData(QVector3D(points[a].x, points[a].y,  0), QVector2D(), vecCol));
-    }
-
-    ptsVbo->create();
-    ptsVbo->bind();
-    ptsVbo->allocate(data.data(), data.size() * sizeof(VertexData));
-
-    quintptr offset = 0;
-
-    _shaderProgram->enableAttributeArray(_vertexLocation);
-    _shaderProgram->setAttributeBuffer(_vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
-
-    offset += sizeof(QVector3D);
-    offset += sizeof(QVector2D);
-
-    _shaderProgram->enableAttributeArray(_colorLocation);
-    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
-
-    ptsVao->release();
-}
-
-void GLWidget::PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol)
-{
-    if(linesVao->isCreated())
-    {
-        linesVao->destroy();
-    }
-
-    linesVao->create();
-    linesVao->bind();
-
-    QVector<VertexData> data;
-    for(uint a = 0; a < lines.size(); a++)
-    {
-        data.append(VertexData(QVector3D(lines[a].XA, lines[a].YA,  0), QVector2D(), vecCol));
-        data.append(VertexData(QVector3D(lines[a].XB, lines[a].YB,  0), QVector2D(), vecCol));
-    }
-
-    linesVbo->create();
-    linesVbo->bind();
-    linesVbo->allocate(data.data(), data.size() * sizeof(VertexData));
-
-    quintptr offset = 0;
-
-    _shaderProgram->enableAttributeArray(_vertexLocation);
-    _shaderProgram->setAttributeBuffer(_vertexLocation, GL_FLOAT, 0, 3, sizeof(VertexData));
-
-    offset += sizeof(QVector3D);
-    offset += sizeof(QVector2D);
-
-    _shaderProgram->enableAttributeArray(_colorLocation);
-    _shaderProgram->setAttributeBuffer(_colorLocation, GL_FLOAT, offset, 3, sizeof(VertexData));
-
-    linesVao->release();
-}
-
 
 void GLWidget::ResizeLines(std::vector<ALine> &lines, AVector offsetVec, float scaleFactor)
 {
@@ -476,29 +373,6 @@ void GLWidget::SaveToSvg()
 
     painter.end();
 
-}
-
-void GLWidget::PaintCurve()
-{
-    //if(_points.size() == 0) { return; }
-
-    _shaderProgram->setUniformValue(_use_color_location, (GLfloat)1.0);
-
-    if(_points.size() != 0)
-    {
-        glPointSize(5.0f);
-        _pointsVao.bind();
-        glDrawArrays(GL_POINTS, 0, _points.size());
-        _pointsVao.release();
-    }
-
-//    if(_tilingLines.size() != 0)
-//    {
-//        glLineWidth(2.0f);
-//        _tilingLinesVao.bind();
-//        glDrawArrays(GL_LINES, 0, _tilingLines.size() * 2);
-//        _tilingLinesVao.release();
-//    }
 }
 
 

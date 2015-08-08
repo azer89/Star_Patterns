@@ -748,6 +748,12 @@
      </item>
      <item row="8" column="0" colspan="3">
       <widget class="QPushButton" name="starColorButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Star Color</string>
        </property>
@@ -758,6 +764,13 @@
      </item>
      <item row="9" column="0" colspan="3">
       <widget class="QPushButton" name="ribbonColorButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+         <kerning>false</kerning>
+        </font>
+       </property>
        <property name="text">
         <string>Ribbon Color</string>
        </property>
@@ -778,6 +791,13 @@
      </item>
      <item row="10" column="0" colspan="3">
       <widget class="QPushButton" name="backgroundColorButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+         <kerning>false</kerning>
+        </font>
+       </property>
        <property name="text">
         <string>Background Color</string>
        </property>

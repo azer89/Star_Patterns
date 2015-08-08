@@ -19,11 +19,28 @@ public:
     PatternGenerator();
     ~PatternGenerator();
 
-    //void InitTiling1();
+
+    /*
+     * Read xml files which contain tiling specifications
+     */
     void InitTiling();
+
+    /*
+     * 1. generate an islamic ornamental tiling given a name of a tiling
+     * 2. Call InferenceAlgorithm()
+     * 3. Create vertex data
+     */
     void GeneratePattern(std::string tilingName);
+
+    /*
+     * Pain function, nothing special
+     */
     void Paint(float zoomFactor);
 
+
+    /*
+     * These functions are called by GLWidget to render an SVG file
+     */
     std::vector<ALine> GetTilingLines() { return _tilingLines; }
     std::vector<ALine> GetTriangleLines() { return _triangleLines; }
     std::vector<ALine> GetBackTriangleLines() { return _backTriangleLines; }
@@ -32,31 +49,82 @@ public:
     std::vector<ALine> GetOLines() { return _oLines; }
 
 private:
+    /*
+     * Generate an N-Gon, this function has a numerical problem so I use epsilon
+     */
     std::vector<AVector>    GenerateNGon(float sides, float radius, float angleOffset, AVector centerPt);
+
+    /*
+     * Copy sourcePolygon to destinationLines
+     */
     void                    ConcatNGon(std::vector<AVector> sourcePolygon, std::vector<ALine> &destinationLines);
+
+    /*
+     * Copy sourcePolygon to shapes
+     */
     void                    ConcatShapes(std::vector<AVector> sourcePolygon, std::vector<std::vector<ALine>>  &shapes);
+
+    /*
+     * The greedy inference algorithm
+     */
     void                    InferenceAlgorithm(std::vector<std::vector<ALine>> shapes);
+
+    /*
+     * Affine transformation
+     */
     AVector                 MultiplyVector(QMatrix3x3 mat, AVector vec);
+
+    /*
+     * Affine transformation
+     */
     void                    MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
+
+    /*
+     * Unsigned angle in radian
+     */
     float                   AngleInBetween(AVector vec1, AVector vec2);
+
+    /*
+     * Read an XML file with TinyXML
+     */
     void                    ReadXML(std::string filename);
+
+    /*
+     *
+     */
     TilingData              GetTiling(std::string tilingName);
 
+    /*
+     * Signed angle in radian
+     */
     float GetRotation(AVector pt1, AVector pt2);
 
+    /*
+     * Get a center of mass of a polygon
+     */
     AVector GetPolygonCentroid(std::vector<ALine> shapes);
 
-    //bool                    IsCollinear(AVector pt1, AVector pt2, AVector pt3);
+    /*
+     * Do both rays are collinear ?
+     */
     bool CheckCollinearCase(ALine ray1, ALine ray2);
+
+    /*
+     * Do both rays create a 90 degree corner
+     */
     bool CheckHorizontalVerticalCase(ALine ray1, ALine ray2);
+
+    /*
+     *
+     */
     void CalculateInterlace(std::pair<ALine, ALine> segment, std::vector<ALine> aShape, std::vector<ALine> &uLines, std::vector<ALine> &oLines);
 
-    void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
-    void PrepareLinesVAO0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2);
-    void PrepareLinesVAO1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
-    void PrepareLinesVAO2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao);
-    void PrepareQuadsVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol);
-    void PrepareTrianglesVAO(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol);
+    void BuildPointsVertexData(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
+    void BuildLinesVertexData0(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol1, QVector3D vecCol2);
+    void BuildLinesVertexData1(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
+    void BuildLinesVertexData2(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao);
+    void BuildQuadsVertexData(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol);
+    void BuildTrianglesVertexData(std::vector<ALine> lines, QOpenGLBuffer* vbo, QOpenGLVertexArrayObject* vao, QVector3D vecCol);
 
 // to do: fix this
 public:

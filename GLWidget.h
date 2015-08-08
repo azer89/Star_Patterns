@@ -51,9 +51,9 @@ private:
     QMatrix4x4  _transformMatrix;
 
 private:
-    void InitCurve();
-    void PaintCurve();
-    void CreateCurveVAO();
+    //void InitCurve();
+    //void PaintCurve();
+    //void CreateCurveVAO();
 
 
 
@@ -63,8 +63,8 @@ private:
     //AVector MultiplyVector(QMatrix3x3 mat, AVector vec);
     //void MultiplyShape(QMatrix3x3 mat, std::vector<AVector>& shape);
 
-    void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
-    void PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
+    //void PreparePointsVAO(std::vector<AVector> points, QOpenGLBuffer* ptsVbo, QOpenGLVertexArrayObject* ptsVao, QVector3D vecCol);
+    //void PrepareLinesVAO(std::vector<ALine> lines, QOpenGLBuffer* linesVbo, QOpenGLVertexArrayObject* linesVao, QVector3D vecCol);
 
 protected:
     // qt event
