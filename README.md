@@ -1,3 +1,5 @@
-An implementation of Kaplan's Polygon in Contact Algorithm to generate Islamic Star Patterns
+An implementation of Craig S. Kaplan's Polygon in Contact Algorithm to generate Islamic Star Patterns:
+(http://www.cgl.uwaterloo.ca/~csk/papers/kaplan_gi2005.pdf)
+
 
 ![alt tag](https://raw.githubusercontent.com/azer89/IslamicStarPatterns/master/IslamicStarPattern.png)
