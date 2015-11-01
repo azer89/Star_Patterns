@@ -5,6 +5,24 @@
 
 #include <QColorDialog>
 
+QColor ToQColor(QVector3D col)
+{
+    return QColor(col.x() * 255.0f, col.y() * 255.0f, col.z() * 255.0f);
+}
+
+QColor InverseGrayScale(QColor col)
+{
+    // 0.2989, 0.5870, 0.1140
+    // 0.30    0.59    0.11
+    float intensity = 0.3f * ((float)col.red()) + 0.59f * ((float)col.green()) + 0.11f * ((float)col.blue());
+    float invIntensity = 255.0 - intensity;
+
+    if(invIntensity > 127.5)
+        return QColor(255, 255, 255);
+
+    return QColor(0, 0, 0);
+}
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -26,41 +44,37 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->backgroundColorButton,	 SIGNAL(clicked()), this, SLOT(BackgroundColorChanged()));
     connect(ui->interlacingColorButton,	 SIGNAL(clicked()), this, SLOT(InterlacingColorChanged()));
 
-    //float radAngle = 32.0f * M_PI / 180.0;
-    //SystemParams::rad_angle = radAngle;
 
-    QVector3D colVec1 = SystemParams::star_color;
-    QColor col1(colVec1.x() * 255.0f, colVec1.y() * 255.0f, colVec1.z() * 255.0f);
+    QColor col1 = ToQColor(SystemParams::star_color);
     ui->starColorButton->setAutoFillBackground(true);
     QPalette palette1 = ui->starColorButton->palette();
     palette1.setColor(ui->starColorButton->backgroundRole(), col1);
-    palette1.setColor(ui->starColorButton->foregroundRole(), QColor(255 - col1.red(), 255 - col1.green(), 255 - col1.blue()));
+    //palette1.setColor(ui->starColorButton->foregroundRole(), QColor(255 - col1.red(), 255 - col1.green(), 255 - col1.blue()));
+    palette1.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(col1));
     ui->starColorButton->setPalette(palette1);
 
-    QVector3D colVec2 = SystemParams::ribbon_color;
-    QColor col2(colVec2.x() * 255.0f, colVec2.y() * 255.0f, colVec2.z() * 255.0f);
+    QColor col2 = ToQColor(SystemParams::ribbon_color);
     ui->ribbonColorButton->setAutoFillBackground(true);
     QPalette palette2 = ui->ribbonColorButton->palette();
     palette2.setColor(ui->ribbonColorButton->backgroundRole(), col2);
-    palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255 - col2.red(), 255 - col2.green(), 255 - col2.blue()));
-    //palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255, 255 , 0));
-    //palette2.setColor(QPalette::Shadow, QColor(255, 255 , 0));
+    //palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255 - col2.red(), 255 - col2.green(), 255 - col2.blue()));
+    palette2.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(col2));
     ui->ribbonColorButton->setPalette(palette2);
 
-    QVector3D colVec3 = SystemParams::background_color;
-    QColor col3(colVec3.x() * 255.0f, colVec3.y() * 255.0f, colVec3.z() * 255.0f);
+    QColor col3 = ToQColor(SystemParams::background_color);
     ui->backgroundColorButton->setAutoFillBackground(true);
     QPalette palette3 = ui->backgroundColorButton->palette();
     palette3.setColor(ui->backgroundColorButton->backgroundRole(), col3);
-    palette3.setColor(ui->backgroundColorButton->foregroundRole(), QColor(255 - col3.red(), 255 - col3.green(), 255 - col3.blue()));
+    //palette3.setColor(ui->backgroundColorButton->foregroundRole(), QColor(255 - col3.red(), 255 - col3.green(), 255 - col3.blue()));
+    palette3.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(col3));
     ui->backgroundColorButton->setPalette(palette3);
 
-    QVector3D colVec4 = SystemParams::interlacing_color;
-    QColor col4(colVec4.x() * 255.0f, colVec4.y() * 255.0f, colVec4.z() * 255.0f);
+    QColor col4 = ToQColor(SystemParams::interlacing_color);
     ui->interlacingColorButton->setAutoFillBackground(true);
     QPalette palette4 = ui->interlacingColorButton->palette();
     palette4.setColor(ui->interlacingColorButton->backgroundRole(), col4);
-    palette4.setColor(ui->interlacingColorButton->foregroundRole(), QColor(255 - col4.red(), 255 - col4.green(), 255 - col4.blue()));
+    //palette4.setColor(ui->interlacingColorButton->foregroundRole(), QColor(255 - col4.red(), 255 - col4.green(), 255 - col4.blue()));
+    palette1.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(col4));
     ui->interlacingColorButton->setPalette(palette4);
 }
 
@@ -78,12 +92,12 @@ void MainWindow::SaveSVG()
 void MainWindow::StarColorChanged()
 {
     //std::cout << "StarColorChanged\n";
-    QVector3D colVec1 = SystemParams::star_color;
-    QColor col1(colVec1.x() * 255.0f, colVec1.y() * 255.0f, colVec1.z() * 255.0f);
+    QColor col1 = ToQColor(SystemParams::star_color);
     QColor newColor = QColorDialog::getColor(col1, this);
     QPalette palette1 = ui->starColorButton->palette();
     palette1.setColor(ui->starColorButton->backgroundRole(), newColor);
-    palette1.setColor(ui->starColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    //palette1.setColor(ui->starColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    palette1.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(newColor));
     ui->starColorButton->setPalette(palette1);
 
     //std::cout << newColor.redF() << " " << newColor.greenF() << " " << newColor.blueF() << "\n";
@@ -107,12 +121,12 @@ void MainWindow::StarColorChanged()
 void MainWindow::RibbonColorChanged()
 {
     //std::cout << "RibbonColorChanged\n";
-    QVector3D colVec2 = SystemParams::ribbon_color;
-    QColor col2(colVec2.x() * 255.0f, colVec2.y() * 255.0f, colVec2.z() * 255.0f);
+    QColor col2 = ToQColor(SystemParams::ribbon_color);
     QColor newColor = QColorDialog::getColor(col2, this);
     QPalette palette2 = ui->ribbonColorButton->palette();
     palette2.setColor(ui->ribbonColorButton->backgroundRole(), newColor);
-    palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    //palette2.setColor(ui->ribbonColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    palette2.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(newColor));
     ui->ribbonColorButton->setPalette(palette2);
 
     SystemParams::ribbon_color = QVector3D(newColor.redF(), newColor.greenF(), newColor.blueF());
@@ -135,12 +149,12 @@ void MainWindow::RibbonColorChanged()
 void MainWindow::BackgroundColorChanged()
 {
     //std::cout << "BackgroundColorChanged\n";
-    QVector3D colVec3 = SystemParams::background_color;
-    QColor col3(colVec3.x() * 255.0f, colVec3.y() * 255.0f, colVec3.z() * 255.0f);
+    QColor col3 = ToQColor(SystemParams::background_color);
     QColor newColor = QColorDialog::getColor(col3, this);
     QPalette palette3 = ui->backgroundColorButton->palette();
     palette3.setColor(ui->backgroundColorButton->backgroundRole(), newColor);
-    palette3.setColor(ui->backgroundColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    //palette3.setColor(ui->backgroundColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    palette3.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(newColor));
     ui->backgroundColorButton->setPalette(palette3);
 
     SystemParams::background_color = QVector3D(newColor.redF(), newColor.greenF(), newColor.blueF());
@@ -163,12 +177,12 @@ void MainWindow::BackgroundColorChanged()
 void MainWindow::InterlacingColorChanged()
 {
     //std::cout << "InterlacingColorChanged\n";
-    QVector3D colVec4 = SystemParams::interlacing_color;
-    QColor col4(colVec4.x() * 255.0f, colVec4.y() * 255.0f, colVec4.z() * 255.0f);
+    QColor col4 = ToQColor(SystemParams::interlacing_color);
     QColor newColor = QColorDialog::getColor(col4, this);
     QPalette palette4 = ui->interlacingColorButton->palette();
     palette4.setColor(ui->interlacingColorButton->backgroundRole(), newColor);
-    palette4.setColor(ui->interlacingColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    //palette4.setColor(ui->interlacingColorButton->foregroundRole(), QColor(255 - newColor.red(), 255 - newColor.green(), 255 - newColor.blue()));
+    palette4.setColor(ui->starColorButton->foregroundRole(), InverseGrayScale(newColor));
     ui->interlacingColorButton->setPalette(palette4);
 
     SystemParams::interlacing_color = QVector3D(newColor.redF(), newColor.greenF(), newColor.blueF());

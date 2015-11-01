@@ -365,6 +365,12 @@
      </item>
      <item row="11" column="0" colspan="3">
       <widget class="QPushButton" name="interlacingColorButton">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
        <property name="text">
         <string>Line Color</string>
        </property>
