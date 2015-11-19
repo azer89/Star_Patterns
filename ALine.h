@@ -12,10 +12,6 @@ public:
     float XA;	float YA;	// start
     float XB;	float YB;	// end
 
-    // custom
-    //int index1;
-    //int index2;
-
     bool    _isRight;
     int     _side;
 
@@ -27,8 +23,6 @@ public:
 
         this->_isRight = false;
         this->_side = -1;
-        //this->index1 = -1;
-        //this->index2 = -1;
     }
 
     // Constructor #2
@@ -39,19 +33,7 @@ public:
 
         this->_isRight = false;
         this->_side = -1;
-        //this->index1 = -1;
-        //this->index2 = -1;
     }
-
-    // Constructor #X
-    /*ALine(ALine otherLine)
-    {
-        this->XA = otherLine.XA;	this->YA = otherLine.YA;
-        this->XB = otherLine.XB;	this->YB = otherLine.YB;
-
-        //this->index1 = -1;
-        //this->index2 = -1;
-    }*/
 
     // Constructor #3
     ALine(AVector v1, AVector v2)
@@ -61,8 +43,6 @@ public:
 
         this->_isRight = false;
         this->_side = -1;
-        //this->index1 = -1;
-        //this->index2 = -1;
     }
 
     // Constructor #4
@@ -73,8 +53,6 @@ public:
 
         this->_isRight = isRight;
         this->_side = side;
-        //this->index1 = -1;
-        //this->index2 = -1;
     }
 
 
@@ -150,17 +128,13 @@ public:
 struct LessThanLineMagnitude
 {
     bool operator() (ALine i, ALine j)
-    {
-        return (i.Magnitude() < j.Magnitude());
-    }
+        { return (i.Magnitude() < j.Magnitude()); }
 };
 
 struct LessThanLineMagnitudePair
 {
     bool operator() (std::pair<ALine, ALine> i, std::pair<ALine, ALine> j)
-    {
-        return ( (i.first.Magnitude() + i.second.Magnitude())  <  (j.first.Magnitude() + j.second.Magnitude()) );
-    }
+        { return ( (i.first.Magnitude() + i.second.Magnitude())  <  (j.first.Magnitude() + j.second.Magnitude()) ); }
 };
 
 

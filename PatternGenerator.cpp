@@ -5,7 +5,7 @@
 
 #include "tinyxml2.h"
 
-#include "ARay.h"
+//#include "ARay.h"
 #include "VertexData.h"
 #include "PatternGenerator.h"
 #include "SystemParams.h"

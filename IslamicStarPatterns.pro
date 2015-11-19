@@ -30,7 +30,6 @@ HEADERS  += mainwindow.h \
     tinyxml2.h \
     PatternGenerator.h \
     TilingData.h \
-    ARay.h \
     SystemParams.h \
     RibbonSegment.h \
     Triangulator.h
